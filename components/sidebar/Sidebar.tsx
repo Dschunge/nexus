@@ -25,6 +25,7 @@ import {
   PanelLeft,
   Plus,
   Search,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,7 @@ import { cn } from "@/lib/utils";
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
+  const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
   const trpc = useTRPC();
@@ -40,6 +42,10 @@ export function Sidebar() {
   const { data: recents } = useQuery(trpc.notes.recents.queryOptions());
   const { data: folders } = useQuery(trpc.folders.list.queryOptions());
   const { data: tags } = useQuery(trpc.tags.list.queryOptions());
+  const { data: tagFilteredNotes } = useQuery({
+    ...trpc.notes.list.queryOptions({ tagId: selectedTagId ?? undefined }),
+    enabled: selectedTagId !== null,
+  });
 
   const createNote = useMutation(
     trpc.notes.create.mutationOptions({
@@ -173,28 +179,63 @@ export function Sidebar() {
               </section>
             )}
 
-            {/* Folders */}
+            {/* Folders / Tag filter */}
             <section>
               <div className="flex items-center justify-between px-2 py-1.5">
                 <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  Folders
+                  {selectedTagId ? "Tag" : "Folders"}
                 </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-5 w-5"
-                  title="New folder"
-                  onClick={() => {
-                    const name = prompt("Folder name:");
-                    if (name?.trim()) {
-                      // handled by FolderTree
-                    }
-                  }}
-                >
-                  <FolderPlus className="h-3 w-3" />
-                </Button>
+                {selectedTagId ? (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-5 w-5"
+                    title="Clear tag filter"
+                    onClick={() => setSelectedTagId(null)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-5 w-5"
+                    title="New folder"
+                    onClick={() => {
+                      const name = prompt("Folder name:");
+                      if (name?.trim()) {
+                        // handled by FolderTree
+                      }
+                    }}
+                  >
+                    <FolderPlus className="h-3 w-3" />
+                  </Button>
+                )}
               </div>
-              <FolderTree folders={folders ?? []} />
+              {selectedTagId ? (
+                tagFilteredNotes && tagFilteredNotes.length === 0 ? (
+                  <p className="px-2 py-1.5 text-xs text-muted-foreground">
+                    No notes with this tag.
+                  </p>
+                ) : (
+                  tagFilteredNotes?.map((note) => (
+                    <Link
+                      key={note.id}
+                      href={`/notes/${note.id}`}
+                      className={cn(
+                        "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground",
+                        pathname === `/notes/${note.id}` &&
+                          "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                      <span className="truncate">{note.title || "Untitled"}</span>
+                    </Link>
+                  ))
+                )
+              ) : (
+                <FolderTree folders={folders ?? []} />
+              )}
             </section>
 
             {/* Tags */}
@@ -211,12 +252,17 @@ export function Sidebar() {
                   {tags.map((tag) => (
                     <Badge
                       key={tag.id}
-                      variant="secondary"
+                      variant={selectedTagId === tag.id ? "default" : "secondary"}
                       className="cursor-pointer text-xs"
+                      onClick={() =>
+                        setSelectedTagId((prev) =>
+                          prev === tag.id ? null : tag.id
+                        )
+                      }
                     >
                       {tag.name}
                       {tag._count.notes > 0 && (
-                        <span className="ml-1 text-muted-foreground">
+                        <span className="ml-1 opacity-70">
                           {tag._count.notes}
                         </span>
                       )}

@@ -7,6 +7,7 @@ export const notesRouter = router({
     .input(
       z.object({
         folderId: z.string().optional(),
+        tagId: z.string().optional(),
         isArchived: z.boolean().optional().default(false),
         isPinned: z.boolean().optional(),
         isFavorite: z.boolean().optional(),
@@ -20,6 +21,7 @@ export const notesRouter = router({
           isArchived: input.isArchived,
           isPinned: input.isPinned,
           isFavorite: input.isFavorite,
+          ...(input.tagId ? { tags: { some: { tagId: input.tagId } } } : {}),
         },
         include: {
           tags: { include: { tag: true } },
