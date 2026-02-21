@@ -13,8 +13,8 @@ import {
   CommandList,
   CommandSeparator,
 } from "cmdk";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { FileText, Plus } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Clock, FileText, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 interface CommandPaletteProps {
@@ -39,6 +39,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     ...trpc.notes.search.queryOptions({ query: debouncedQuery }),
     enabled: debouncedQuery.trim().length > 0,
   });
+
+  const { data: recents } = useQuery(trpc.notes.recents.queryOptions());
 
   const createNote = useMutation(
     trpc.notes.create.mutationOptions({
@@ -65,6 +67,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="overflow-hidden p-0 shadow-2xl" aria-describedby={undefined}>
+        <DialogTitle className="sr-only">Quick Switcher</DialogTitle>
         <Command className="[&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium">
           <div className="flex items-center border-b border-border px-3">
             <CommandInput
@@ -76,11 +79,30 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           </div>
           <CommandList className="max-h-[400px] overflow-y-auto overflow-x-hidden">
             <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
-              {query ? "No results found." : "Start typing to search…"}
+              {query ? "No results found." : "No recent notes."}
             </CommandEmpty>
 
-            {/* Search results */}
-            {searchResults && searchResults.length > 0 && (
+            {/* Recent notes (empty query) */}
+            {query === "" && recents && recents.length > 0 && (
+              <CommandGroup heading="Recent">
+                {recents.map((note) => (
+                  <CommandItem
+                    key={note.id}
+                    value={`recent-${note.id}`}
+                    onSelect={() => handleSelect(`/notes/${note.id}`)}
+                    className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground"
+                  >
+                    <Clock className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span className="truncate font-medium">
+                      {note.title || "Untitled"}
+                    </span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+
+            {/* Search results (non-empty query) */}
+            {query !== "" && searchResults && searchResults.length > 0 && (
               <CommandGroup heading="Notes">
                 {searchResults.map((note) => (
                   <CommandItem
