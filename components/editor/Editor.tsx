@@ -27,6 +27,9 @@ import { AICommandMenu } from "./AICommandMenu";
 import { Toolbar } from "./Toolbar";
 import { SlashCommand } from "./SlashCommandExtension";
 import { slashCommandSuggestion } from "./SlashCommandRenderer";
+import { WikiLinkNode } from "./WikiLinkExtension";
+import { WikiLinkSuggestion } from "./WikiLinkSuggestionExtension";
+import { wikiLinkSuggestion } from "./WikiLinkRenderer";
 
 const lowlight = createLowlight(common);
 
@@ -57,6 +60,7 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
       onSuccess: () => {
         setIsSaving(false);
         queryClient.invalidateQueries(trpc.notes.recents.queryOptions());
+        queryClient.invalidateQueries(trpc.notes.backlinks.queryOptions({ noteId }));
       },
       onError: () => {
         setIsSaving(false);
@@ -104,6 +108,8 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
       Typography,
       Highlight.configure({ multicolor: true }),
       SlashCommand.configure({ suggestion: slashCommandSuggestion }),
+      WikiLinkNode,
+      WikiLinkSuggestion.configure({ suggestion: wikiLinkSuggestion }),
     ],
     content: initialContent,
     editorProps: {

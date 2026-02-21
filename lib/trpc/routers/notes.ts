@@ -146,4 +146,18 @@ export const notesRouter = router({
         take: 50,
       });
     }),
+
+  backlinks: protectedProcedure
+    .input(z.object({ noteId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.prisma.note.findMany({
+        where: {
+          userId: ctx.user.id,
+          NOT: { id: input.noteId },
+          content: { contains: `data-wiki-link="${input.noteId}"` },
+        },
+        select: { id: true, title: true, updatedAt: true },
+        orderBy: { updatedAt: "desc" },
+      });
+    }),
 });

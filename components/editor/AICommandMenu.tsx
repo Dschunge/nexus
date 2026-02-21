@@ -124,8 +124,8 @@ export function AICommandMenu({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[80vh] max-w-2xl flex-col overflow-hidden">
+        <DialogHeader className="shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
             AI Assistant
@@ -202,11 +202,11 @@ export function AICommandMenu({
             )}
           </div>
         ) : (
-          <div className="space-y-4">
-            <ScrollArea className="max-h-64 rounded-md border border-border p-3">
+          <div className="flex min-h-0 flex-1 flex-col gap-4">
+            <ScrollArea className="min-h-0 flex-1 rounded-md border border-border p-3">
               <p className="whitespace-pre-wrap text-sm">{result}</p>
             </ScrollArea>
-            <div className="flex gap-2">
+            <div className="flex shrink-0 gap-2">
               <Button onClick={handleAccept} className="flex-1">
                 Accept
               </Button>

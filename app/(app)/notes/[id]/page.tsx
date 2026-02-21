@@ -13,6 +13,7 @@ import { Star, Archive, Trash2, Pin } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { BacklinksPanel } from "@/components/editor/BacklinksPanel";
 
 export default function NotePage({
   params,
@@ -157,13 +158,16 @@ export default function NotePage({
         />
       </div>
 
-      {/* Editor */}
-      <div className="flex-1 overflow-hidden">
-        <Editor
-          key={id}
-          noteId={id}
-          initialContent={note.content}
-        />
+      {/* Editor + Backlinks */}
+      <div className="flex-1 overflow-y-auto flex flex-col">
+        <div className="flex-1">
+          <Editor
+            key={id}
+            noteId={id}
+            initialContent={note.content}
+          />
+        </div>
+        <BacklinksPanel noteId={id} />
       </div>
     </div>
   );
