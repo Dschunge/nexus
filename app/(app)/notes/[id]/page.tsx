@@ -9,11 +9,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatDistanceToNow } from "@/lib/format";
-import { Star, Archive, Trash2, Pin } from "lucide-react";
+import { Star, Archive, Trash2, Pin, Download, FileText, FileDown } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { BacklinksPanel } from "@/components/editor/BacklinksPanel";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import TurndownService from "turndown";
 
 export default function NotePage({
   params,
@@ -83,6 +90,50 @@ export default function NotePage({
   }
 
   const displayTitle = title ?? note.title;
+  const noteContent = note.content;
+
+  function exportMarkdown() {
+    const td = new TurndownService({ headingStyle: "atx", codeBlockStyle: "fenced" });
+    const markdown = `# ${displayTitle}\n\n${td.turndown(noteContent)}`;
+    const blob = new Blob([markdown], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${displayTitle || "Untitled"}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportPDF() {
+    const html = `<!DOCTYPE html>
+<html><head>
+  <meta charset="utf-8">
+  <title>${displayTitle}</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 2rem; color: #111; line-height: 1.6; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2, h3 { margin-top: 1.5rem; }
+    code { background: #f4f4f4; padding: 0.15em 0.4em; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #f4f4f4; padding: 1rem; border-radius: 6px; overflow: auto; }
+    pre code { background: none; padding: 0; }
+    blockquote { border-left: 4px solid #ddd; margin: 0; padding-left: 1rem; color: #555; }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { border: 1px solid #ddd; padding: 0.5rem 0.75rem; text-align: left; }
+    th { background: #f4f4f4; font-weight: 600; }
+    img { max-width: 100%; }
+    a { color: #6366f1; }
+  </style>
+</head><body>
+  <h1>${displayTitle}</h1>
+  ${noteContent}
+</body></html>`;
+    const w = window.open("", "_blank");
+    if (!w) { toast.error("Pop-up blocked — allow pop-ups and try again"); return; }
+    w.document.write(html);
+    w.document.close();
+    w.focus();
+    w.print();
+  }
 
   return (
     <div className="flex h-full flex-col">
@@ -146,6 +197,23 @@ export default function NotePage({
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-7 w-7" title="Export">
+                <Download className="h-3.5 w-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={exportMarkdown}>
+                <FileText className="mr-2 h-3.5 w-3.5" />
+                Export as Markdown
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportPDF}>
+                <FileDown className="mr-2 h-3.5 w-3.5" />
+                Export as PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
