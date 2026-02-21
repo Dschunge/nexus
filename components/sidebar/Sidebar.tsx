@@ -39,6 +39,9 @@ export function Sidebar() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
+  const { data: favorites } = useQuery(
+    trpc.notes.list.queryOptions({ isFavorite: true })
+  );
   const { data: recents } = useQuery(trpc.notes.recents.queryOptions());
   const { data: folders } = useQuery(trpc.folders.list.queryOptions());
   const { data: tags } = useQuery(trpc.tags.list.queryOptions());
@@ -152,6 +155,33 @@ export function Sidebar() {
 
         <ScrollArea className="flex-1">
           <div className="space-y-1 px-2 pb-4">
+            {/* Favorites */}
+            {favorites && favorites.length > 0 && (
+              <section>
+                <div className="flex items-center gap-1 px-2 py-1.5">
+                  <Star className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Favorites
+                  </span>
+                </div>
+                {favorites.map((note) => (
+                  <Link
+                    key={note.id}
+                    href={`/notes/${note.id}`}
+                    className={cn(
+                      "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground",
+                      pathname === `/notes/${note.id}` &&
+                        "bg-accent text-accent-foreground"
+                    )}
+                  >
+                    <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    <span className="truncate">{note.title || "Untitled"}</span>
+                  </Link>
+                ))}
+                <Separator className="my-2" />
+              </section>
+            )}
+
             {/* Recents */}
             {recents && recents.length > 0 && (
               <section>

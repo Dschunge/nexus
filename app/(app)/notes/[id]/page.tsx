@@ -35,6 +35,7 @@ export default function NotePage({
         queryClient.invalidateQueries(trpc.notes.get.queryOptions({ id }));
         queryClient.invalidateQueries(trpc.notes.recents.queryOptions());
         queryClient.invalidateQueries(trpc.notes.list.queryOptions({ folderId: note?.folderId ?? undefined }));
+        queryClient.invalidateQueries(trpc.notes.list.queryOptions({ isFavorite: true }));
       },
       onError: () => toast.error("Failed to update note"),
     })
