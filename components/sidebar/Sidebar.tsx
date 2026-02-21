@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useTRPC } from "@/lib/trpc/client";
@@ -25,15 +25,18 @@ import {
   PanelLeft,
   Plus,
   Search,
+  Upload,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { marked } from "marked";
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const pathname = usePathname();
   const trpc = useTRPC();
@@ -59,6 +62,51 @@ export function Sidebar() {
       },
       onError: () => toast.error("Failed to create note"),
     })
+  );
+
+  const importNote = useMutation(trpc.notes.create.mutationOptions());
+
+  const handleImport = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (!files || files.length === 0) return;
+      const toImport = Array.from(files).filter((f) =>
+        /\.(md|mdx|txt)$/i.test(f.name)
+      );
+      if (toImport.length === 0) {
+        toast.error("No Markdown or text files found");
+        e.target.value = "";
+        return;
+      }
+      toast.loading(
+        `Importing ${toImport.length} note${toImport.length > 1 ? "s" : ""}…`,
+        { id: "import" }
+      );
+      const results = await Promise.allSettled(
+        toImport.map(async (file) => {
+          const text = await file.text();
+          const title = file.name.replace(/\.(md|mdx|txt)$/i, "");
+          const content = marked(text) as string;
+          return importNote.mutateAsync({ title, content });
+        })
+      );
+      e.target.value = "";
+      const succeeded = results.filter((r) => r.status === "fulfilled").length;
+      const failed = results.filter((r) => r.status === "rejected").length;
+      queryClient.invalidateQueries(trpc.notes.list.queryOptions({}));
+      queryClient.invalidateQueries(trpc.notes.recents.queryOptions());
+      if (failed === 0) {
+        toast.success(
+          `Imported ${succeeded} note${succeeded > 1 ? "s" : ""}`,
+          { id: "import" }
+        );
+      } else {
+        toast.warning(`Imported ${succeeded}, failed ${failed}`, {
+          id: "import",
+        });
+      }
+    },
+    [importNote, queryClient, trpc]
   );
 
   // Cmd+\ to toggle sidebar
@@ -151,6 +199,24 @@ export function Sidebar() {
           >
             <Search className="h-3.5 w-3.5" />
           </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="shrink-0"
+            onClick={() => fileInputRef.current?.click()}
+            title="Import Markdown files"
+            disabled={importNote.isPending}
+          >
+            <Upload className="h-3.5 w-3.5" />
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".md,.mdx,.txt"
+            multiple
+            className="hidden"
+            onChange={handleImport}
+          />
         </div>
 
         <ScrollArea className="flex-1">
