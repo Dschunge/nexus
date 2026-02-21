@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nexus
+
+Advanced note-taking app for developers and power users. Built with a keyboard-first, distraction-free philosophy and AI features that feel native.
+
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss)
+![Prisma](https://img.shields.io/badge/Prisma-v5-2D3748?logo=prisma)
+
+## Features
+
+- **Rich editor** — Tiptap-powered with slash commands (`/`), toolbar, task lists, tables, code blocks with syntax highlighting
+- **AI inline commands** — `Ctrl+J` to continue writing, rewrite, summarize, explain, fix code, or run a custom prompt via Claude
+- **Command palette** — `Ctrl+K` for instant full-text note search and quick actions
+- **Autosave** — every keystroke debounced and saved within 1 second
+- **Folders & tags** — nested folder tree, tag management
+- **Dark mode by default** — respects system preference, toggleable
+
+## Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router, TypeScript) |
+| Editor | Tiptap (ProseMirror) |
+| Styling | Tailwind CSS v4 + shadcn/ui |
+| API | tRPC v11 + TanStack Query |
+| Database | PostgreSQL via Prisma v5 |
+| Auth | Better-Auth (email/password) |
+| AI | Anthropic Claude API (`claude-sonnet-4-6`) |
+| Package manager | pnpm |
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 22+
+- pnpm (`npm install -g pnpm`)
+- PostgreSQL database
+
+### 1. Clone and install
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Dschunge/nexus.git
+cd nexus
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Configure environment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create a `.env.local` file in the project root:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/nexus
+BETTER_AUTH_SECRET=your-32-char-secret
+BETTER_AUTH_URL=http://localhost:3000
+ANTHROPIC_API_KEY=sk-ant-...
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
 
-## Learn More
+Get an Anthropic API key at [platform.claude.com](https://platform.claude.com).
 
-To learn more about Next.js, take a look at the following resources:
+### 3. Set up the database
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm prisma db push
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 4. Run the dev server
 
-## Deploy on Vercel
+```bash
+pnpm dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Open [http://localhost:3000](http://localhost:3000), sign up, and start writing.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Keyboard Shortcuts
+
+| Action | Shortcut |
+|---|---|
+| New note | `Ctrl+N` |
+| Search / Command palette | `Ctrl+K` |
+| AI commands | `Ctrl+J` |
+| Toggle sidebar | `Ctrl+\` |
+| Slash command menu | `/` in editor |
+| Bold | `Ctrl+B` |
+| Italic | `Ctrl+I` |
+
+## Project Structure
+
+```
+nexus/
+├── app/
+│   ├── (auth)/login & signup    # Auth pages
+│   ├── (app)/notes/[id]         # Note editor view
+│   └── api/auth & trpc          # API routes
+├── components/
+│   ├── editor/                  # Tiptap editor, toolbar, AI menu, slash commands
+│   ├── sidebar/                 # Sidebar, folder tree
+│   └── search/                  # Command palette
+├── lib/
+│   ├── auth.ts                  # Better-Auth config
+│   ├── db.ts                    # Prisma client
+│   ├── anthropic.ts             # Claude client
+│   └── trpc/                    # tRPC routers (notes, folders, tags, ai)
+└── prisma/schema.prisma         # Database schema
+```
+
+## License
+
+MIT
