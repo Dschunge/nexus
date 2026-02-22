@@ -27,6 +27,7 @@ import {
   Search,
   Upload,
   X,
+  GitFork,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -372,6 +373,16 @@ export function Sidebar() {
 
         {/* Footer */}
         <div className="border-t border-border p-2">
+          <Link
+            href="/graph"
+            className={cn(
+              "flex w-full items-center rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+              pathname === "/graph" && "bg-accent text-accent-foreground"
+            )}
+          >
+            <GitFork className="mr-2 h-3.5 w-3.5" />
+            Graph view
+          </Link>
           <Button
             variant="ghost"
             size="sm"

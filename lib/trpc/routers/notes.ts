@@ -149,6 +149,29 @@ export const notesRouter = router({
       });
     }),
 
+  graph: protectedProcedure.query(async ({ ctx }) => {
+    const notes = await ctx.prisma.note.findMany({
+      where: { userId: ctx.user.id, isArchived: false },
+      select: { id: true, title: true, content: true },
+    });
+
+    const nodes = notes.map((n) => ({ id: n.id, title: n.title || "Untitled" }));
+
+    const links: { source: string; target: string }[] = [];
+    const noteIds = new Set(notes.map((n) => n.id));
+    for (const note of notes) {
+      const matches = note.content.matchAll(/data-wiki-link="([^"]+)"/g);
+      for (const match of matches) {
+        const targetId = match[1];
+        if (noteIds.has(targetId) && targetId !== note.id) {
+          links.push({ source: note.id, target: targetId });
+        }
+      }
+    }
+
+    return { nodes, links };
+  }),
+
   backlinks: protectedProcedure
     .input(z.object({ noteId: z.string() }))
     .query(async ({ ctx, input }) => {
