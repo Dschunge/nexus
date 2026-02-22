@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { BacklinksPanel } from "@/components/editor/BacklinksPanel";
+import { VersionHistoryDialog } from "@/components/editor/VersionHistoryDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -197,6 +198,7 @@ export default function NotePage({
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
+          <VersionHistoryDialog noteId={id} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-7 w-7" title="Export">
@@ -231,7 +233,7 @@ export default function NotePage({
       <div className="flex-1 overflow-y-auto flex flex-col">
         <div className="flex-1">
           <Editor
-            key={id}
+            key={`${id}-${note.updatedAt}`}
             noteId={id}
             initialContent={note.content}
           />
