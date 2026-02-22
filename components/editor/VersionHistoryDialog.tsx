@@ -51,7 +51,7 @@ export function VersionHistoryDialog({ noteId }: Props) {
   const selected =
     versions?.find((v) => v.id === selectedId) ?? versions?.[0] ?? null;
 
-  const isEmpty = !isLoading && versions?.length === 0;
+  const isEmpty = !isLoading && (!versions || versions.length === 0);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -94,7 +94,7 @@ export function VersionHistoryDialog({ noteId }: Props) {
             {/* Version list */}
             <ScrollArea className="w-52 shrink-0 border-r border-border">
               <div className="p-2">
-                {versions!.map((version, i) => (
+                {(versions ?? []).map((version, i) => (
                   <button
                     key={version.id}
                     onClick={() => setSelectedId(version.id)}
@@ -106,7 +106,7 @@ export function VersionHistoryDialog({ noteId }: Props) {
                     )}
                   >
                     <div className="text-sm font-medium">
-                      {i === 0 ? "Latest saved" : `Version ${versions!.length - i}`}
+                      {i === 0 ? "Latest saved" : `Version ${(versions?.length ?? 0) - i}`}
                     </div>
                     <div className="mt-0.5 text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(version.createdAt))} ago
