@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { BacklinksPanel } from "@/components/editor/BacklinksPanel";
 import { VersionHistoryDialog } from "@/components/editor/VersionHistoryDialog";
+import { AISuggestTags } from "@/components/editor/AISuggestTags";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -156,6 +157,7 @@ export default function NotePage({
               </div>
             </>
           )}
+          <AISuggestTags noteId={id} />
         </div>
         <div className="flex items-center gap-1">
           <Button
