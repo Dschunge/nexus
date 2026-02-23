@@ -22,7 +22,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { Bold, Italic, Link2, Sparkles } from "lucide-react";
+import { Bold, Italic, Link2, Sparkles, Strikethrough, Heading1, Heading2, Heading3, RemoveFormatting } from "lucide-react";
 import { AICommandMenu } from "./AICommandMenu";
 import { Toolbar } from "./Toolbar";
 import { SlashCommand } from "./SlashCommandExtension";
@@ -135,8 +135,8 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
           const rect = range.getBoundingClientRect();
           const containerRect = containerRef.current.getBoundingClientRect();
           setBubblePos({
-            top: rect.top - containerRect.top - 48,
-            left: Math.max(0, rect.left - containerRect.left + rect.width / 2 - 96),
+            top: rect.top - containerRect.top - 52,
+            left: Math.max(0, rect.left - containerRect.left + rect.width / 2 - 160),
           });
         }
       } else {
@@ -183,57 +183,102 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
       {/* Bubble toolbar — pill shaped */}
       {bubblePos && hasSelection && editor && (
         <div
-          className="absolute z-20 flex items-center gap-0.5 rounded-full border border-border/50 bg-popover/95 px-2 py-1.5 shadow-2xl backdrop-blur-xl"
+          className="absolute z-20 flex items-center gap-0.5 rounded-lg border border-border/50 bg-popover/95 px-1.5 py-1 shadow-2xl backdrop-blur-xl"
           style={{ top: bubblePos.top, left: bubblePos.left }}
         >
+          {/* Text size */}
           <Button
             variant="ghost"
             size="sm"
-            className={cn(
-              "h-7 w-7 rounded-full p-0 transition-colors",
-              editor.isActive("bold") && "bg-primary/15 text-primary"
-            )}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              editor.chain().focus().toggleBold().run();
-            }}
+            className={cn("h-7 w-7 p-0 transition-colors", editor.isActive("heading", { level: 1 }) && "bg-primary/15 text-primary")}
+            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 1 }).run(); }}
+            title="Heading 1"
+          >
+            <Heading1 className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn("h-7 w-7 p-0 transition-colors", editor.isActive("heading", { level: 2 }) && "bg-primary/15 text-primary")}
+            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 2 }).run(); }}
+            title="Heading 2"
+          >
+            <Heading2 className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn("h-7 w-7 p-0 transition-colors", editor.isActive("heading", { level: 3 }) && "bg-primary/15 text-primary")}
+            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 3 }).run(); }}
+            title="Heading 3"
+          >
+            <Heading3 className="h-3.5 w-3.5" />
+          </Button>
+
+          <div className="mx-0.5 h-4 w-px bg-border/60" />
+
+          {/* Inline marks */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn("h-7 w-7 p-0 transition-colors", editor.isActive("bold") && "bg-primary/15 text-primary")}
+            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBold().run(); }}
+            title="Bold"
           >
             <Bold className="h-3.5 w-3.5" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className={cn(
-              "h-7 w-7 rounded-full p-0 transition-colors",
-              editor.isActive("italic") && "bg-primary/15 text-primary"
-            )}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              editor.chain().focus().toggleItalic().run();
-            }}
+            className={cn("h-7 w-7 p-0 transition-colors", editor.isActive("italic") && "bg-primary/15 text-primary")}
+            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleItalic().run(); }}
+            title="Italic"
           >
             <Italic className="h-3.5 w-3.5" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className={cn(
-              "h-7 w-7 rounded-full p-0 transition-colors",
-              editor.isActive("link") && "bg-primary/15 text-primary"
-            )}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              const url = prompt("URL:");
-              if (url) editor.chain().focus().setLink({ href: url }).run();
-            }}
+            className={cn("h-7 w-7 p-0 transition-colors", editor.isActive("strike") && "bg-primary/15 text-primary")}
+            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleStrike().run(); }}
+            title="Strikethrough"
           >
-            <Link2 className="h-3.5 w-3.5" />
+            <Strikethrough className="h-3.5 w-3.5" />
           </Button>
-          <div className="mx-0.5 h-4 w-px bg-border/60" />
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 w-7 rounded-full p-0 text-primary transition-colors hover:bg-primary/15"
+            className={cn("h-7 w-7 p-0 transition-colors", editor.isActive("link") && "bg-primary/15 text-primary")}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              if (editor.isActive("link")) {
+                editor.chain().focus().unsetLink().run();
+              } else {
+                const url = prompt("URL:");
+                if (url) editor.chain().focus().setLink({ href: url }).run();
+              }
+            }}
+            title="Link"
+          >
+            <Link2 className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0 transition-colors"
+            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().clearNodes().unsetAllMarks().run(); }}
+            title="Clear formatting"
+          >
+            <RemoveFormatting className="h-3.5 w-3.5" />
+          </Button>
+
+          <div className="mx-0.5 h-4 w-px bg-border/60" />
+
+          {/* AI */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0 text-primary transition-colors hover:bg-primary/15"
             onMouseDown={(e) => {
               e.preventDefault();
               const { from, to } = editor.state.selection;
@@ -241,6 +286,7 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
               setSelectedText(text);
               setAiMenuOpen(true);
             }}
+            title="AI Assistant"
           >
             <Sparkles className="h-3.5 w-3.5" />
           </Button>
