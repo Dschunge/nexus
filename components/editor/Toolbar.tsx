@@ -42,13 +42,13 @@ function ToolbarButton({ onClick, active, disabled, title, children }: ToolbarBu
       variant="ghost"
       size="icon"
       className={cn(
-        "h-7 w-7 shrink-0",
-        active && "bg-accent text-accent-foreground"
+        "h-7 w-7 shrink-0 transition-colors duration-150",
+        active && "bg-primary/10 text-primary"
       )}
       onClick={onClick}
       disabled={disabled}
       title={title}
-      onMouseDown={(e) => e.preventDefault()} // keep editor focus
+      onMouseDown={(e) => e.preventDefault()}
     >
       {children}
     </Button>
@@ -57,7 +57,7 @@ function ToolbarButton({ onClick, active, disabled, title, children }: ToolbarBu
 
 export function Toolbar({ editor }: ToolbarProps) {
   return (
-    <div className="flex flex-wrap items-center gap-0.5 border-b border-border bg-background px-4 py-1.5">
+    <div className="flex flex-wrap items-center gap-0.5 border-b border-border/50 bg-background/95 px-6 py-2 backdrop-blur-sm">
       {/* History */}
       <ToolbarButton
         onClick={() => editor.chain().focus().undo().run()}
@@ -74,7 +74,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         <Redo className="h-3.5 w-3.5" />
       </ToolbarButton>
 
-      <Separator orientation="vertical" className="mx-1 h-5" />
+      <Separator orientation="vertical" className="mx-1 h-4 opacity-30" />
 
       {/* Headings */}
       <ToolbarButton
@@ -99,7 +99,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         <Heading3 className="h-3.5 w-3.5" />
       </ToolbarButton>
 
-      <Separator orientation="vertical" className="mx-1 h-5" />
+      <Separator orientation="vertical" className="mx-1 h-4 opacity-30" />
 
       {/* Inline marks */}
       <ToolbarButton
@@ -138,7 +138,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         <Highlighter className="h-3.5 w-3.5" />
       </ToolbarButton>
 
-      <Separator orientation="vertical" className="mx-1 h-5" />
+      <Separator orientation="vertical" className="mx-1 h-4 opacity-30" />
 
       {/* Lists */}
       <ToolbarButton
@@ -163,7 +163,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         <CheckSquare className="h-3.5 w-3.5" />
       </ToolbarButton>
 
-      <Separator orientation="vertical" className="mx-1 h-5" />
+      <Separator orientation="vertical" className="mx-1 h-4 opacity-30" />
 
       {/* Blocks */}
       <ToolbarButton
@@ -187,7 +187,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         <Minus className="h-3.5 w-3.5" />
       </ToolbarButton>
 
-      <Separator orientation="vertical" className="mx-1 h-5" />
+      <Separator orientation="vertical" className="mx-1 h-4 opacity-30" />
 
       {/* Link */}
       <ToolbarButton

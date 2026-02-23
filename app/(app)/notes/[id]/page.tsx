@@ -7,7 +7,6 @@ import { Editor } from "@/components/editor/Editor";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { formatDistanceToNow } from "@/lib/format";
 import { Star, Archive, Trash2, Pin, Download, FileText, FileDown } from "lucide-react";
 import { toast } from "sonner";
@@ -74,11 +73,15 @@ export default function NotePage({
 
   if (isLoading) {
     return (
-      <div className="flex h-full flex-col gap-4 p-8">
-        <Skeleton className="h-8 w-2/3" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-4/5" />
-        <Skeleton className="h-4 w-3/5" />
+      <div className="flex h-full flex-col gap-5 px-10 py-10">
+        <Skeleton className="h-10 w-3/4 rounded-md" />
+        <Skeleton className="h-3 w-36 rounded" />
+        <div className="mt-4 space-y-3">
+          <Skeleton className="h-4 w-full rounded" />
+          <Skeleton className="h-4 w-5/6 rounded" />
+          <Skeleton className="h-4 w-4/6 rounded" />
+          <Skeleton className="h-4 w-full rounded" />
+        </div>
       </div>
     );
   }
@@ -107,10 +110,11 @@ export default function NotePage({
   }
 
   function exportPDF() {
+    const safeTitle = displayTitle.replace(/</g, "&lt;").replace(/>/g, "&gt;");
     const html = `<!DOCTYPE html>
 <html><head>
   <meta charset="utf-8">
-  <title>${displayTitle}</title>
+  <title>${safeTitle}</title>
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 2rem; color: #111; line-height: 1.6; }
     h1 { font-size: 2rem; margin-bottom: 0.5rem; }
@@ -126,31 +130,34 @@ export default function NotePage({
     a { color: #6366f1; }
   </style>
 </head><body>
-  <h1>${displayTitle}</h1>
+  <h1>${safeTitle}</h1>
   ${noteContent}
 </body></html>`;
-    const w = window.open("", "_blank");
-    if (!w) { toast.error("Pop-up blocked — allow pop-ups and try again"); return; }
-    w.document.write(html);
-    w.document.close();
-    w.focus();
-    w.print();
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const w = window.open(url, "_blank");
+    if (!w) { toast.error("Pop-up blocked — allow pop-ups and try again"); URL.revokeObjectURL(url); return; }
+    w.addEventListener("load", () => { w.print(); URL.revokeObjectURL(url); }, { once: true });
   }
 
   return (
     <div className="flex h-full flex-col">
-      {/* Note toolbar */}
-      <div className="flex items-center justify-between border-b border-border px-6 py-2">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>
-            Updated {formatDistanceToNow(new Date(note.updatedAt))} ago
+      {/* Note meta bar */}
+      <div className="flex items-center justify-between border-b border-border/40 px-8 py-2">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground/70">
+          <span className="tabular-nums">
+            {formatDistanceToNow(new Date(note.updatedAt))} ago
           </span>
           {note.tags.length > 0 && (
             <>
-              <span>·</span>
+              <span className="opacity-40">·</span>
               <div className="flex gap-1">
                 {note.tags.map(({ tag }) => (
-                  <Badge key={tag.id} variant="secondary" className="text-xs">
+                  <Badge
+                    key={tag.id}
+                    variant="secondary"
+                    className="rounded-full px-2 py-0 text-xs font-normal"
+                  >
                     {tag.name}
                   </Badge>
                 ))}
@@ -159,29 +166,41 @@ export default function NotePage({
           )}
           <AISuggestTags noteId={id} />
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <Button
             variant="ghost"
             size="icon"
-            className={cn("h-7 w-7", note.isFavorite && "text-yellow-500")}
+            className={cn(
+              "h-7 w-7 transition-colors",
+              note.isFavorite ? "text-primary" : "text-muted-foreground/50 hover:text-foreground"
+            )}
             onClick={() => updateNote.mutate({ id, isFavorite: !note.isFavorite })}
             title="Favorite"
           >
-            <Star className="h-3.5 w-3.5" />
+            <Star
+              className="h-3.5 w-3.5"
+              fill={note.isFavorite ? "currentColor" : "none"}
+            />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            className={cn("h-7 w-7", note.isPinned && "text-primary")}
+            className={cn(
+              "h-7 w-7 transition-colors",
+              note.isPinned ? "text-primary" : "text-muted-foreground/50 hover:text-foreground"
+            )}
             onClick={() => updateNote.mutate({ id, isPinned: !note.isPinned })}
             title="Pin"
           >
-            <Pin className="h-3.5 w-3.5" />
+            <Pin
+              className="h-3.5 w-3.5"
+              fill={note.isPinned ? "currentColor" : "none"}
+            />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7"
+            className="h-7 w-7 text-muted-foreground/50 transition-colors hover:text-foreground"
             onClick={() => updateNote.mutate({ id, isArchived: !note.isArchived })}
             title={note.isArchived ? "Unarchive" : "Archive"}
           >
@@ -190,7 +209,7 @@ export default function NotePage({
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-destructive hover:text-destructive"
+            className="h-7 w-7 text-muted-foreground/50 transition-colors hover:text-destructive"
             onClick={() => {
               if (confirm("Delete this note?")) {
                 deleteNote.mutate({ id });
@@ -203,7 +222,12 @@ export default function NotePage({
           <VersionHistoryDialog noteId={id} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-7 w-7" title="Export">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-muted-foreground/50 transition-colors hover:text-foreground"
+                title="Export"
+              >
                 <Download className="h-3.5 w-3.5" />
               </Button>
             </DropdownMenuTrigger>
@@ -222,17 +246,24 @@ export default function NotePage({
       </div>
 
       {/* Title */}
-      <div className="px-8 pt-6">
-        <Input
+      <div className="px-10 pb-1 pt-8">
+        <input
           value={displayTitle}
           onChange={(e) => handleTitleChange(e.target.value)}
-          className="border-0 bg-transparent px-0 text-3xl font-bold shadow-none placeholder:text-muted-foreground/40 focus-visible:ring-0"
+          className="w-full bg-transparent text-foreground placeholder:text-muted-foreground/25 focus:outline-none"
+          style={{
+            fontFamily: "var(--font-playfair), Georgia, serif",
+            fontSize: "clamp(1.875rem, 3.5vw, 2.5rem)",
+            fontWeight: 700,
+            lineHeight: 1.2,
+            letterSpacing: "-0.02em",
+          }}
           placeholder="Untitled"
         />
       </div>
 
       {/* Editor + Backlinks */}
-      <div className="flex-1 overflow-y-auto flex flex-col">
+      <div className="flex flex-1 flex-col overflow-y-auto">
         <div className="flex-1">
           <Editor
             key={`${id}-${note.updatedAt}`}

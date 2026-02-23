@@ -115,7 +115,7 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[calc(100vh-8rem)] px-8 py-4",
+          "prose prose-base dark:prose-invert max-w-none focus:outline-none min-h-[calc(100vh-10rem)] px-10 py-6",
       },
     },
     onUpdate: ({ editor }) => {
@@ -135,8 +135,8 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
           const rect = range.getBoundingClientRect();
           const containerRect = containerRef.current.getBoundingClientRect();
           setBubblePos({
-            top: rect.top - containerRect.top - 44,
-            left: Math.max(0, rect.left - containerRect.left + rect.width / 2 - 100),
+            top: rect.top - containerRect.top - 48,
+            left: Math.max(0, rect.left - containerRect.left + rect.width / 2 - 96),
           });
         }
       } else {
@@ -145,7 +145,7 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
     },
   });
 
-  // Cmd+J to open AI menu
+  // Ctrl+J to open AI menu
   useEffect(() => {
     if (!editor) return;
     const handler = (e: KeyboardEvent) => {
@@ -180,21 +180,19 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
 
   return (
     <div className="relative flex h-full flex-col" ref={containerRef}>
-      {/* Saving indicator */}
-      <div className="absolute right-4 top-2 z-10 text-xs text-muted-foreground">
-        {isSaving && "Saving…"}
-      </div>
-
-      {/* Bubble toolbar */}
+      {/* Bubble toolbar — pill shaped */}
       {bubblePos && hasSelection && editor && (
         <div
-          className="absolute z-20 flex overflow-hidden rounded-md border border-border bg-popover shadow-md"
+          className="absolute z-20 flex items-center gap-0.5 rounded-full border border-border/50 bg-popover/95 px-2 py-1.5 shadow-2xl backdrop-blur-xl"
           style={{ top: bubblePos.top, left: bubblePos.left }}
         >
           <Button
             variant="ghost"
             size="sm"
-            className={cn("h-8 rounded-none px-3", editor.isActive("bold") && "bg-accent")}
+            className={cn(
+              "h-7 w-7 rounded-full p-0 transition-colors",
+              editor.isActive("bold") && "bg-primary/15 text-primary"
+            )}
             onMouseDown={(e) => {
               e.preventDefault();
               editor.chain().focus().toggleBold().run();
@@ -205,7 +203,10 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
           <Button
             variant="ghost"
             size="sm"
-            className={cn("h-8 rounded-none px-3", editor.isActive("italic") && "bg-accent")}
+            className={cn(
+              "h-7 w-7 rounded-full p-0 transition-colors",
+              editor.isActive("italic") && "bg-primary/15 text-primary"
+            )}
             onMouseDown={(e) => {
               e.preventDefault();
               editor.chain().focus().toggleItalic().run();
@@ -216,7 +217,10 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
           <Button
             variant="ghost"
             size="sm"
-            className={cn("h-8 rounded-none px-3", editor.isActive("link") && "bg-accent")}
+            className={cn(
+              "h-7 w-7 rounded-full p-0 transition-colors",
+              editor.isActive("link") && "bg-primary/15 text-primary"
+            )}
             onMouseDown={(e) => {
               e.preventDefault();
               const url = prompt("URL:");
@@ -225,10 +229,11 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
           >
             <Link2 className="h-3.5 w-3.5" />
           </Button>
+          <div className="mx-0.5 h-4 w-px bg-border/60" />
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 rounded-none px-3"
+            className="h-7 w-7 rounded-full p-0 text-primary transition-colors hover:bg-primary/15"
             onMouseDown={(e) => {
               e.preventDefault();
               const { from, to } = editor.state.selection;
@@ -251,8 +256,13 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
       </div>
 
       {/* Status bar */}
-      <div className="flex items-center justify-end border-t border-border px-4 py-1 text-xs text-muted-foreground">
-        <span>{wordCount} words</span>
+      <div className="flex items-center justify-between border-t border-border/40 px-8 py-1.5 text-xs">
+        <span className="italic text-muted-foreground/50">
+          {isSaving ? "Saving…" : ""}
+        </span>
+        <span className="tabular-nums text-muted-foreground/70">
+          {wordCount.toLocaleString()} {wordCount === 1 ? "word" : "words"}
+        </span>
       </div>
 
       {/* AI Command Menu */}
