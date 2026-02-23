@@ -133,9 +133,7 @@
 /* ── Editor typography ──────────────────────────────────────────── */
 
 .ProseMirror {
-  font-family: var(--font-lora), Georgia, "Times New Roman", serif;
-  line-height: 1.85;
-  letter-spacing: 0.008em;
+  line-height: 1.75;
 }
 
 .ProseMirror h1,
@@ -144,7 +142,6 @@
 .ProseMirror h4,
 .ProseMirror h5,
 .ProseMirror h6 {
-  font-family: var(--font-playfair), Georgia, serif;
   font-weight: 700;
   letter-spacing: -0.02em;
 }

@@ -267,7 +267,6 @@ export default function NotePage({
           onChange={(e) => handleTitleChange(e.target.value)}
           className="w-full bg-transparent text-foreground placeholder:text-foreground/25 focus:outline-none"
           style={{
-            fontFamily: "var(--font-playfair), Georgia, serif",
             fontSize: "clamp(1.875rem, 3.5vw, 2.5rem)",
             fontWeight: 700,
             lineHeight: 1.2,
