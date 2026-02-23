@@ -144,7 +144,7 @@ export default function NotePage({
     <div className="flex h-full flex-col">
       {/* Note meta bar */}
       <div className="flex items-center justify-between border-b border-border/40 px-8 py-2">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground/70">
+        <div className="flex items-center gap-2 text-xs text-foreground/70">
           <span className="tabular-nums">
             {formatDistanceToNow(new Date(note.updatedAt))} ago
           </span>
@@ -172,7 +172,7 @@ export default function NotePage({
             size="icon"
             className={cn(
               "h-7 w-7 transition-colors",
-              note.isFavorite ? "text-primary" : "text-muted-foreground/50 hover:text-foreground"
+              note.isFavorite ? "text-primary" : "text-foreground/75 hover:text-foreground"
             )}
             onClick={() => updateNote.mutate({ id, isFavorite: !note.isFavorite })}
             title="Favorite"
@@ -187,7 +187,7 @@ export default function NotePage({
             size="icon"
             className={cn(
               "h-7 w-7 transition-colors",
-              note.isPinned ? "text-primary" : "text-muted-foreground/50 hover:text-foreground"
+              note.isPinned ? "text-primary" : "text-foreground/75 hover:text-foreground"
             )}
             onClick={() => updateNote.mutate({ id, isPinned: !note.isPinned })}
             title="Pin"
@@ -200,7 +200,7 @@ export default function NotePage({
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-muted-foreground/50 transition-colors hover:text-foreground"
+            className="h-7 w-7 text-foreground/75 transition-colors hover:text-foreground"
             onClick={() => updateNote.mutate({ id, isArchived: !note.isArchived })}
             title={note.isArchived ? "Unarchive" : "Archive"}
           >
@@ -209,7 +209,7 @@ export default function NotePage({
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-muted-foreground/50 transition-colors hover:text-destructive"
+            className="h-7 w-7 text-foreground/75 transition-colors hover:text-destructive"
             onClick={() => {
               if (confirm("Delete this note?")) {
                 deleteNote.mutate({ id });
@@ -225,7 +225,7 @@ export default function NotePage({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 text-muted-foreground/50 transition-colors hover:text-foreground"
+                className="h-7 w-7 text-foreground/75 transition-colors hover:text-foreground"
                 title="Export"
               >
                 <Download className="h-3.5 w-3.5" />

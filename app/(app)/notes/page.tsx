@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useTRPC } from "@/lib/trpc/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { FileText, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
 export default function NotesWelcomePage() {
@@ -23,26 +23,37 @@ export default function NotesWelcomePage() {
   );
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-      <div className="rounded-full bg-muted p-6">
-        <FileText className="h-12 w-12 text-muted-foreground" />
-      </div>
-      <div>
-        <h2 className="text-2xl font-semibold">No note selected</h2>
-        <p className="mt-1 text-muted-foreground">
-          Select a note from the sidebar or create a new one
+    <div className="flex h-full flex-col items-center justify-center gap-8">
+      <div className="space-y-3 text-center">
+        <p
+          className="text-5xl text-foreground/90"
+          style={{
+            fontFamily: "var(--font-playfair), Georgia, serif",
+            fontWeight: 400,
+            fontStyle: "italic",
+            letterSpacing: "-0.01em",
+          }}
+        >
+          Begin writing.
+        </p>
+        <p className="text-sm text-muted-foreground/70">
+          Select a note from the sidebar or start a new one.
         </p>
       </div>
+
       <Button
+        size="sm"
         onClick={() => createNote.mutate({ title: "Untitled" })}
         disabled={createNote.isPending}
       >
-        <Plus className="mr-2 h-4 w-4" />
+        <Plus className="mr-2 h-3.5 w-3.5" />
         New note
       </Button>
-      <p className="text-xs text-muted-foreground">
+
+      <p className="text-xs text-muted-foreground/50">
         <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">Ctrl+N</kbd>{" "}
-        new note &nbsp;·&nbsp;{" "}
+        new note{" "}
+        <span className="mx-1 opacity-50">·</span>{" "}
         <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">Ctrl+K</kbd>{" "}
         search
       </p>

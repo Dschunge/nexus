@@ -126,29 +126,36 @@ export function AICommandMenu({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="flex max-h-[80vh] max-w-2xl flex-col overflow-hidden">
         <DialogHeader className="shrink-0">
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-base">
             <Sparkles className="h-4 w-4 text-primary" />
-            AI Assistant
+            <span
+              style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontStyle: "italic" }}
+            >
+              AI Assistant
+            </span>
           </DialogTitle>
         </DialogHeader>
 
         {!result ? (
           <div className="space-y-4">
             {selectedText && (
-              <div className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
-                <p className="mb-1 text-xs font-medium uppercase tracking-wider">Selected text</p>
-                <p className="line-clamp-3">{selectedText}</p>
+              <div className="rounded-lg border border-border/50 bg-muted/50 px-4 py-3 text-sm">
+                <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
+                  Selected text
+                </p>
+                <p className="line-clamp-3 text-muted-foreground">{selectedText}</p>
               </div>
             )}
 
             <div className="grid grid-cols-2 gap-2">
               {AI_COMMANDS.map((cmd) => {
                 const Icon = cmd.icon;
+                const isActive = activeCommand === cmd.id && isLoading;
                 return (
                   <Button
                     key={cmd.id}
                     variant="outline"
-                    className="h-auto justify-start gap-3 py-3"
+                    className="h-auto justify-start gap-3 border-border/60 py-3 transition-colors hover:border-primary/30 hover:bg-primary/5"
                     disabled={isLoading}
                     onClick={() => {
                       if (cmd.id === "custom") {
@@ -158,10 +165,12 @@ export function AICommandMenu({
                       }
                     }}
                   >
-                    <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <Icon
+                      className={isActive ? "h-4 w-4 shrink-0 animate-spin text-primary" : "h-4 w-4 shrink-0 text-primary/70"}
+                    />
                     <div className="text-left">
                       <div className="text-sm font-medium">{cmd.label}</div>
-                      <div className="text-xs text-muted-foreground">{cmd.description}</div>
+                      <div className="text-xs text-muted-foreground/70">{cmd.description}</div>
                     </div>
                   </Button>
                 );
@@ -176,6 +185,7 @@ export function AICommandMenu({
                   onChange={(e) => setCustomPrompt(e.target.value)}
                   rows={3}
                   autoFocus
+                  className="border-border/60 bg-background/50 focus-visible:border-primary/50 focus-visible:ring-primary/20"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -194,17 +204,17 @@ export function AICommandMenu({
             )}
 
             {isLoading && (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-4/5" />
-                <Skeleton className="h-4 w-3/5" />
+              <div className="space-y-2 pt-1">
+                <Skeleton className="h-3.5 w-full" />
+                <Skeleton className="h-3.5 w-4/5" />
+                <Skeleton className="h-3.5 w-3/5" />
               </div>
             )}
           </div>
         ) : (
           <div className="flex min-h-0 flex-1 flex-col gap-4">
-            <ScrollArea className="min-h-0 flex-1 rounded-md border border-border p-3">
-              <p className="whitespace-pre-wrap text-sm">{result}</p>
+            <ScrollArea className="min-h-0 flex-1 rounded-lg border border-border/50 bg-muted/30 p-4">
+              <p className="whitespace-pre-wrap text-sm leading-relaxed">{result}</p>
             </ScrollArea>
             <div className="flex shrink-0 gap-2">
               <Button onClick={handleAccept} className="flex-1">
@@ -212,6 +222,7 @@ export function AICommandMenu({
               </Button>
               <Button
                 variant="outline"
+                className="border-border/60"
                 onClick={() => {
                   setResult("");
                   setActiveCommand(null);

@@ -56,7 +56,7 @@ export function VersionHistoryDialog({ noteId }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-7 w-7" title="Version history">
+        <Button variant="ghost" size="icon" className="h-7 w-7 text-foreground/75 hover:text-foreground" title="Version history">
           <History className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>

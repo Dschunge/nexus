@@ -16,11 +16,9 @@ import {
   FileText,
   FolderPlus,
   LogOut,
-  Pin,
   Star,
   Clock,
   Tag,
-  Trash2,
   PanelLeftClose,
   PanelLeft,
   Plus,
@@ -110,7 +108,6 @@ export function Sidebar() {
     [importNote, queryClient, trpc]
   );
 
-  // Cmd+\ to toggle sidebar
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "\\") {
@@ -133,10 +130,11 @@ export function Sidebar() {
   if (collapsed) {
     return (
       <>
-        <div className="flex w-12 flex-col items-center gap-2 border-r border-border py-4">
+        <div className="flex w-12 shrink-0 flex-col items-center gap-2 border-r border-border/50 bg-sidebar py-4">
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8 text-foreground/60 hover:text-foreground"
             onClick={() => setCollapsed(false)}
             title="Expand sidebar (Ctrl+\)"
           >
@@ -145,6 +143,7 @@ export function Sidebar() {
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8 text-foreground/50 hover:text-primary"
             onClick={() => createNote.mutate({ title: "Untitled" })}
             title="New note (Ctrl+N)"
           >
@@ -153,6 +152,7 @@ export function Sidebar() {
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8 text-foreground/60 hover:text-foreground"
             onClick={() => setCommandOpen(true)}
             title="Search (Ctrl+K)"
           >
@@ -164,15 +164,24 @@ export function Sidebar() {
     );
   }
 
+  const noteLink = (noteId: string) =>
+    cn(
+      "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-primary/8 hover:text-foreground",
+      pathname === `/notes/${noteId}` && "bg-primary/10 text-primary"
+    );
+
   return (
     <>
-      <div className="flex w-[280px] shrink-0 flex-col border-r border-border bg-sidebar">
+      <div className="flex w-70 shrink-0 flex-col border-r border-border/50 bg-sidebar">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3">
-          <span className="text-lg font-semibold tracking-tight">Nexus</span>
+        <div className="flex items-center justify-between px-4 py-3.5">
+          <span className="text-base font-semibold tracking-tight text-foreground">
+            Nexus
+          </span>
           <Button
             variant="ghost"
             size="icon"
+            className="h-7 w-7 text-foreground/70 hover:text-foreground"
             onClick={() => setCollapsed(true)}
             title="Collapse sidebar (Ctrl+\)"
           >
@@ -188,13 +197,13 @@ export function Sidebar() {
             onClick={() => createNote.mutate({ title: "Untitled" })}
             disabled={createNote.isPending}
           >
-            <Plus className="mr-1 h-3.5 w-3.5" />
+            <Plus className="mr-1.5 h-3.5 w-3.5" />
             New note
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="shrink-0"
+            className="h-8 w-8 shrink-0 border-border/60 text-foreground/70 hover:text-foreground"
             onClick={() => setCommandOpen(true)}
             title="Search (Ctrl+K)"
           >
@@ -203,7 +212,7 @@ export function Sidebar() {
           <Button
             variant="outline"
             size="icon"
-            className="shrink-0"
+            className="h-8 w-8 shrink-0 border-border/60 text-foreground/70 hover:text-foreground"
             onClick={() => fileInputRef.current?.click()}
             title="Import Markdown files"
             disabled={importNote.isPending}
@@ -225,68 +234,52 @@ export function Sidebar() {
             {/* Favorites */}
             {favorites && favorites.length > 0 && (
               <section>
-                <div className="flex items-center gap-1 px-2 py-1.5">
-                  <Star className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <div className="flex items-center gap-1.5 px-2 py-1.5">
+                  <Star className="h-3 w-3 text-primary" />
+                  <span className="text-xs font-medium uppercase tracking-wider text-foreground/60">
                     Favorites
                   </span>
                 </div>
                 {favorites.map((note) => (
-                  <Link
-                    key={note.id}
-                    href={`/notes/${note.id}`}
-                    className={cn(
-                      "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground",
-                      pathname === `/notes/${note.id}` &&
-                        "bg-accent text-accent-foreground"
-                    )}
-                  >
-                    <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                  <Link key={note.id} href={`/notes/${note.id}`} className={noteLink(note.id)}>
+                    <FileText className="h-3.5 w-3.5 shrink-0 text-foreground/70" />
                     <span className="truncate">{note.title || "Untitled"}</span>
                   </Link>
                 ))}
-                <Separator className="my-2" />
+                <Separator className="my-2 opacity-30" />
               </section>
             )}
 
             {/* Recents */}
             {recents && recents.length > 0 && (
               <section>
-                <div className="flex items-center gap-1 px-2 py-1.5">
-                  <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <div className="flex items-center gap-1.5 px-2 py-1.5">
+                  <Clock className="h-3 w-3 text-foreground/80" />
+                  <span className="text-xs font-medium uppercase tracking-wider text-foreground/60">
                     Recents
                   </span>
                 </div>
                 {recents.map((note) => (
-                  <Link
-                    key={note.id}
-                    href={`/notes/${note.id}`}
-                    className={cn(
-                      "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground",
-                      pathname === `/notes/${note.id}` &&
-                        "bg-accent text-accent-foreground"
-                    )}
-                  >
-                    <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                  <Link key={note.id} href={`/notes/${note.id}`} className={noteLink(note.id)}>
+                    <FileText className="h-3.5 w-3.5 shrink-0 text-foreground/70" />
                     <span className="truncate">{note.title || "Untitled"}</span>
                   </Link>
                 ))}
-                <Separator className="my-2" />
+                <Separator className="my-2 opacity-30" />
               </section>
             )}
 
             {/* Folders / Tag filter */}
             <section>
               <div className="flex items-center justify-between px-2 py-1.5">
-                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <span className="text-xs font-medium uppercase tracking-wider text-foreground/60">
                   {selectedTagId ? "Tag" : "Folders"}
                 </span>
                 {selectedTagId ? (
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-5 w-5"
+                    className="h-5 w-5 text-foreground/60 hover:text-foreground"
                     title="Clear tag filter"
                     onClick={() => setSelectedTagId(null)}
                   >
@@ -296,7 +289,7 @@ export function Sidebar() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-5 w-5"
+                    className="h-5 w-5 text-foreground/60 hover:text-foreground"
                     title="New folder"
                     onClick={() => {
                       const name = prompt("Folder name:");
@@ -311,21 +304,13 @@ export function Sidebar() {
               </div>
               {selectedTagId ? (
                 tagFilteredNotes && tagFilteredNotes.length === 0 ? (
-                  <p className="px-2 py-1.5 text-xs text-muted-foreground">
+                  <p className="px-2 py-1.5 text-xs italic text-muted-foreground">
                     No notes with this tag.
                   </p>
                 ) : (
                   tagFilteredNotes?.map((note) => (
-                    <Link
-                      key={note.id}
-                      href={`/notes/${note.id}`}
-                      className={cn(
-                        "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground",
-                        pathname === `/notes/${note.id}` &&
-                          "bg-accent text-accent-foreground"
-                      )}
-                    >
-                      <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    <Link key={note.id} href={`/notes/${note.id}`} className={noteLink(note.id)}>
+                      <FileText className="h-3.5 w-3.5 shrink-0 text-foreground/70" />
                       <span className="truncate">{note.title || "Untitled"}</span>
                     </Link>
                   ))
@@ -338,10 +323,10 @@ export function Sidebar() {
             {/* Tags */}
             {tags && tags.length > 0 && (
               <section>
-                <Separator className="my-2" />
-                <div className="flex items-center gap-1 px-2 py-1.5">
-                  <Tag className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <Separator className="my-2 opacity-30" />
+                <div className="flex items-center gap-1.5 px-2 py-1.5">
+                  <Tag className="h-3 w-3 text-foreground/80" />
+                  <span className="text-xs font-medium uppercase tracking-wider text-foreground/60">
                     Tags
                   </span>
                 </div>
@@ -350,7 +335,7 @@ export function Sidebar() {
                     <Badge
                       key={tag.id}
                       variant={selectedTagId === tag.id ? "default" : "secondary"}
-                      className="cursor-pointer text-xs"
+                      className="cursor-pointer rounded-full text-xs font-normal"
                       onClick={() =>
                         setSelectedTagId((prev) =>
                           prev === tag.id ? null : tag.id
@@ -359,7 +344,7 @@ export function Sidebar() {
                     >
                       {tag.name}
                       {tag._count.notes > 0 && (
-                        <span className="ml-1 opacity-70">
+                        <span className="ml-1 opacity-60">
                           {tag._count.notes}
                         </span>
                       )}
@@ -372,12 +357,12 @@ export function Sidebar() {
         </ScrollArea>
 
         {/* Footer */}
-        <div className="border-t border-border p-2">
+        <div className="border-t border-border/40 p-2">
           <Link
             href="/graph"
             className={cn(
-              "flex w-full items-center rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-              pathname === "/graph" && "bg-accent text-accent-foreground"
+              "flex w-full items-center rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-primary/8 hover:text-foreground",
+              pathname === "/graph" && "bg-primary/10 text-primary"
             )}
           >
             <GitFork className="mr-2 h-3.5 w-3.5" />
@@ -386,7 +371,7 @@ export function Sidebar() {
           <Button
             variant="ghost"
             size="sm"
-            className="w-full justify-start text-muted-foreground"
+            className="w-full justify-start text-foreground/60 hover:text-foreground"
             onClick={async () => {
               await signOut();
               router.push("/login");

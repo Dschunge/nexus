@@ -89,7 +89,7 @@ export function AISuggestTags({ noteId }: Props) {
       <Button
         variant="ghost"
         size="icon"
-        className="h-7 w-7"
+        className="h-7 w-7 text-foreground/75 hover:text-primary"
         title="Suggest tags with AI"
         disabled={suggest.isPending}
         onClick={() => suggest.mutate({ noteId })}

@@ -52,8 +52,8 @@ function FolderItem({
     <div>
       <div
         className={cn(
-          "group flex items-center gap-1 rounded-md py-1 hover:bg-accent hover:text-accent-foreground",
-          "cursor-pointer text-sm"
+          "group flex items-center gap-1 rounded-md py-1 hover:bg-primary/8 hover:text-foreground",
+          "cursor-pointer text-sm text-foreground/80"
         )}
         style={{ paddingLeft: `${8 + depth * 12}px`, paddingRight: "8px" }}
         onClick={() => setOpen((o) => !o)}
@@ -66,9 +66,9 @@ function FolderItem({
           <span className="w-3.5" />
         )}
         {open ? (
-          <FolderOpen className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <FolderOpen className="h-3.5 w-3.5 shrink-0 text-primary/60" />
         ) : (
-          <Folder className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <Folder className="h-3.5 w-3.5 shrink-0 text-foreground/70" />
         )}
         <span className="flex-1 truncate">{folder.name}</span>
         <Button
@@ -95,12 +95,12 @@ function FolderItem({
               key={note.id}
               href={`/notes/${note.id}`}
               className={cn(
-                "flex items-center gap-2 rounded-md py-1 text-sm hover:bg-accent hover:text-accent-foreground",
-                pathname === `/notes/${note.id}` && "bg-accent text-accent-foreground"
+                "flex items-center gap-2 rounded-md py-1 text-sm text-foreground/80 hover:bg-primary/8 hover:text-foreground",
+                pathname === `/notes/${note.id}` && "bg-primary/10 text-primary"
               )}
               style={{ paddingLeft: `${20 + (depth + 1) * 12}px`, paddingRight: "8px" }}
             >
-              <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              <FileText className="h-3.5 w-3.5 shrink-0 text-foreground/70" />
               <span className="truncate">{note.title || "Untitled"}</span>
             </Link>
           ))}
@@ -129,7 +129,7 @@ export function FolderTree({ folders }: { folders: FolderWithChildren[] }) {
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start text-muted-foreground text-xs"
+          className="w-full justify-start text-foreground/70 text-xs hover:text-foreground/80"
           onClick={() => {
             const name = prompt("Folder name:");
             if (name?.trim()) {
@@ -153,7 +153,7 @@ export function FolderTree({ folders }: { folders: FolderWithChildren[] }) {
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start text-muted-foreground text-xs"
+          className="w-full justify-start text-foreground/70 text-xs hover:text-foreground/80"
           onClick={() => {
             const name = prompt("Folder name:");
             if (name?.trim()) {

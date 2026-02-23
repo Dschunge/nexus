@@ -68,7 +68,7 @@ export function ChatWidget() {
       {/* Floating toggle button */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-colors hover:bg-primary/90"
+        className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl transition-all hover:scale-105 hover:shadow-2xl"
         title="Chat with your notes"
       >
         {open ? (
@@ -81,20 +81,25 @@ export function ChatWidget() {
       {/* Slide-in panel */}
       <div
         className={cn(
-          "fixed right-0 top-0 z-30 flex h-full w-[380px] flex-col border-l border-border bg-background shadow-xl transition-transform duration-300",
+          "fixed right-0 top-0 z-30 flex h-full w-95 flex-col border-l border-border/50 bg-background/95 shadow-2xl backdrop-blur-xl transition-transform duration-300",
           open ? "translate-x-0" : "translate-x-full"
         )}
       >
         {/* Header */}
-        <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+        <div className="flex items-center gap-2.5 border-b border-border/40 px-5 py-4">
           <Sparkles className="h-4 w-4 text-primary" />
-          <span className="font-semibold">Chat with Notes</span>
+          <span
+            className="text-sm text-foreground"
+            style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontStyle: "italic" }}
+          >
+            Chat with Notes
+          </span>
           <div className="ml-auto flex items-center gap-1">
             {messages.length > 0 && (
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 text-muted-foreground"
+                className="h-7 w-7 text-muted-foreground/60 hover:text-foreground"
                 title="Clear conversation"
                 onClick={() => setMessages([])}
               >
@@ -104,7 +109,7 @@ export function ChatWidget() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7"
+              className="h-7 w-7 text-muted-foreground/60 hover:text-foreground"
               onClick={() => setOpen(false)}
             >
               <X className="h-4 w-4" />
@@ -115,14 +120,19 @@ export function ChatWidget() {
         {/* Messages */}
         <ScrollArea className="flex-1 px-4 py-4">
           {messages.length === 0 ? (
-            <div className="mt-12 space-y-2 text-center text-sm text-muted-foreground">
-              <p className="font-medium">Ask anything about your notes.</p>
-              <p className="text-xs">
-                "What did I write about X?" · "Summarize my notes on Y"
+            <div className="mt-16 space-y-2 text-center">
+              <p
+                className="text-lg text-muted-foreground/70"
+                style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontStyle: "italic" }}
+              >
+                Ask anything about your notes.
+              </p>
+              <p className="text-xs text-muted-foreground/50">
+                &ldquo;What did I write about X?&rdquo; &middot; &ldquo;Summarize my notes on Y&rdquo;
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {messages.map((msg, i) => (
                 <div
                   key={i}
@@ -133,20 +143,18 @@ export function ChatWidget() {
                 >
                   <div
                     className={cn(
-                      "max-w-[85%] rounded-lg px-3 py-2 text-sm",
+                      "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
                       msg.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-foreground"
+                        ? "rounded-br-sm bg-primary text-primary-foreground"
+                        : "rounded-bl-sm bg-muted/60 text-foreground"
                     )}
                   >
                     <p className="whitespace-pre-wrap">{msg.content}</p>
                     {msg.sources && msg.sources.length > 0 && (
                       <>
-                        <Separator className="my-2 opacity-30" />
+                        <Separator className="my-2 opacity-20" />
                         <div className="flex flex-wrap items-center gap-1">
-                          <span className="text-xs text-muted-foreground">
-                            Sources:
-                          </span>
+                          <span className="text-xs opacity-60">Sources:</span>
                           {msg.sources.map((s) => (
                             <Link
                               key={s.id}
@@ -155,7 +163,7 @@ export function ChatWidget() {
                             >
                               <Badge
                                 variant="secondary"
-                                className="cursor-pointer text-xs hover:bg-accent"
+                                className="cursor-pointer rounded-full text-xs hover:bg-primary/10 hover:text-primary"
                               >
                                 {s.title || "Untitled"}
                               </Badge>
@@ -170,8 +178,12 @@ export function ChatWidget() {
 
               {chat.isPending && (
                 <div className="flex justify-start">
-                  <div className="animate-pulse rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
-                    Thinking…
+                  <div className="rounded-2xl rounded-bl-sm bg-muted/60 px-4 py-2.5 text-sm text-muted-foreground">
+                    <span className="inline-flex gap-1">
+                      <span className="animate-bounce" style={{ animationDelay: "0ms" }}>·</span>
+                      <span className="animate-bounce" style={{ animationDelay: "150ms" }}>·</span>
+                      <span className="animate-bounce" style={{ animationDelay: "300ms" }}>·</span>
+                    </span>
                   </div>
                 </div>
               )}
@@ -182,7 +194,7 @@ export function ChatWidget() {
         </ScrollArea>
 
         {/* Input */}
-        <div className="border-t border-border p-3">
+        <div className="border-t border-border/40 p-4">
           <div className="flex gap-2">
             <Textarea
               ref={textareaRef}
@@ -195,18 +207,19 @@ export function ChatWidget() {
                 }
               }}
               placeholder="Ask about your notes…"
-              className="max-h-32 min-h-[2.5rem] resize-none text-sm"
+              className="max-h-32 min-h-10 resize-none border-border/60 bg-background/50 text-sm focus-visible:border-primary/50 focus-visible:ring-primary/20"
               rows={1}
             />
             <Button
               size="icon"
               onClick={handleSend}
               disabled={!input.trim() || chat.isPending}
+              className="shrink-0"
             >
               <Send className="h-4 w-4" />
             </Button>
           </div>
-          <p className="mt-1.5 text-xs text-muted-foreground">
+          <p className="mt-2 text-xs text-muted-foreground/40">
             Enter to send · Shift+Enter for newline
           </p>
         </div>
