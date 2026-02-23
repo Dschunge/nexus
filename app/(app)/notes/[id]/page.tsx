@@ -53,6 +53,11 @@ export default function NotePage({
     trpc.notes.delete.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries(trpc.notes.recents.queryOptions());
+        queryClient.invalidateQueries(trpc.notes.list.queryOptions({}));
+        queryClient.invalidateQueries(trpc.notes.list.queryOptions({ isFavorite: true }));
+        if (note?.folderId) {
+          queryClient.invalidateQueries(trpc.notes.list.queryOptions({ folderId: note.folderId }));
+        }
         router.push("/notes");
         toast.success("Note deleted");
       },

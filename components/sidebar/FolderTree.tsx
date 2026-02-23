@@ -40,6 +40,7 @@ function FolderItem({
     trpc.notes.create.mutationOptions({
       onSuccess: (note) => {
         queryClient.invalidateQueries(trpc.notes.recents.queryOptions());
+        queryClient.invalidateQueries(trpc.notes.list.queryOptions({ folderId: folder.id }));
         router.push(`/notes/${note.id}`);
       },
       onError: () => toast.error("Failed to create note"),
