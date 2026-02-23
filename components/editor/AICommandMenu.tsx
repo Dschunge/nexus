@@ -128,11 +128,7 @@ export function AICommandMenu({
         <DialogHeader className="shrink-0">
           <DialogTitle className="flex items-center gap-2 text-base">
             <Sparkles className="h-4 w-4 text-primary" />
-            <span
-              style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontStyle: "italic" }}
-            >
-              AI Assistant
-            </span>
+            <span>AI Assistant</span>
           </DialogTitle>
         </DialogHeader>
 
@@ -140,7 +136,7 @@ export function AICommandMenu({
           <div className="space-y-4">
             {selectedText && (
               <div className="rounded-lg border border-border/50 bg-muted/50 px-4 py-3 text-sm">
-                <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
+                <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-foreground/60">
                   Selected text
                 </p>
                 <p className="line-clamp-3 text-muted-foreground">{selectedText}</p>
@@ -170,7 +166,7 @@ export function AICommandMenu({
                     />
                     <div className="text-left">
                       <div className="text-sm font-medium">{cmd.label}</div>
-                      <div className="text-xs text-muted-foreground/70">{cmd.description}</div>
+                      <div className="text-xs text-foreground/70">{cmd.description}</div>
                     </div>
                   </Button>
                 );

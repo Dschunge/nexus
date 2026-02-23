@@ -25,18 +25,10 @@ export default function NotesWelcomePage() {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-8">
       <div className="space-y-3 text-center">
-        <p
-          className="text-5xl text-foreground/90"
-          style={{
-            fontFamily: "var(--font-playfair), Georgia, serif",
-            fontWeight: 400,
-            fontStyle: "italic",
-            letterSpacing: "-0.01em",
-          }}
-        >
+        <p className="text-4xl font-semibold text-foreground">
           Begin writing.
         </p>
-        <p className="text-sm text-muted-foreground/70">
+        <p className="text-sm text-foreground/70">
           Select a note from the sidebar or start a new one.
         </p>
       </div>
@@ -50,7 +42,7 @@ export default function NotesWelcomePage() {
         New note
       </Button>
 
-      <p className="text-xs text-muted-foreground/50">
+      <p className="text-xs text-foreground/50">
         <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">Ctrl+N</kbd>{" "}
         new note{" "}
         <span className="mx-1 opacity-50">·</span>{" "}

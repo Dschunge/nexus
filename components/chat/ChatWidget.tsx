@@ -65,18 +65,16 @@ export function ChatWidget() {
 
   return (
     <>
-      {/* Floating toggle button */}
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl transition-all hover:scale-105 hover:shadow-2xl"
-        title="Chat with your notes"
-      >
-        {open ? (
-          <X className="h-5 w-5" />
-        ) : (
+      {/* Floating toggle button — only shown when panel is closed */}
+      {!open && (
+        <button
+          onClick={() => setOpen(true)}
+          className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl transition-all hover:scale-105 hover:shadow-2xl"
+          title="Chat with your notes"
+        >
           <MessageSquare className="h-5 w-5" />
-        )}
-      </button>
+        </button>
+      )}
 
       {/* Slide-in panel */}
       <div
@@ -88,10 +86,7 @@ export function ChatWidget() {
         {/* Header */}
         <div className="flex items-center gap-2.5 border-b border-border/40 px-5 py-4">
           <Sparkles className="h-4 w-4 text-primary" />
-          <span
-            className="text-sm text-foreground"
-            style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontStyle: "italic" }}
-          >
+          <span className="text-sm font-medium text-foreground">
             Chat with Notes
           </span>
           <div className="ml-auto flex items-center gap-1">
@@ -99,7 +94,7 @@ export function ChatWidget() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 text-muted-foreground/60 hover:text-foreground"
+                className="h-7 w-7 text-foreground/80 hover:text-foreground"
                 title="Clear conversation"
                 onClick={() => setMessages([])}
               >
@@ -109,7 +104,7 @@ export function ChatWidget() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 text-muted-foreground/60 hover:text-foreground"
+              className="h-7 w-7 text-foreground/80 hover:text-foreground"
               onClick={() => setOpen(false)}
             >
               <X className="h-4 w-4" />
@@ -121,13 +116,10 @@ export function ChatWidget() {
         <ScrollArea className="flex-1 px-4 py-4">
           {messages.length === 0 ? (
             <div className="mt-16 space-y-2 text-center">
-              <p
-                className="text-lg text-muted-foreground/70"
-                style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontStyle: "italic" }}
-              >
+              <p className="text-lg text-foreground">
                 Ask anything about your notes.
               </p>
-              <p className="text-xs text-muted-foreground/50">
+              <p className="text-xs text-foreground/60">
                 &ldquo;What did I write about X?&rdquo; &middot; &ldquo;Summarize my notes on Y&rdquo;
               </p>
             </div>
@@ -178,7 +170,7 @@ export function ChatWidget() {
 
               {chat.isPending && (
                 <div className="flex justify-start">
-                  <div className="rounded-2xl rounded-bl-sm bg-muted/60 px-4 py-2.5 text-sm text-muted-foreground">
+                  <div className="rounded-2xl rounded-bl-sm bg-muted/60 px-4 py-2.5 text-sm text-foreground/70">
                     <span className="inline-flex gap-1">
                       <span className="animate-bounce" style={{ animationDelay: "0ms" }}>·</span>
                       <span className="animate-bounce" style={{ animationDelay: "150ms" }}>·</span>
@@ -219,7 +211,7 @@ export function ChatWidget() {
               <Send className="h-4 w-4" />
             </Button>
           </div>
-          <p className="mt-2 text-xs text-muted-foreground/40">
+          <p className="mt-2 text-xs text-foreground/50">
             Enter to send · Shift+Enter for newline
           </p>
         </div>

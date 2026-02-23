@@ -70,17 +70,17 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         aria-describedby={undefined}
       >
         <DialogTitle className="sr-only">Quick Switcher</DialogTitle>
-        <Command className="**:[[cmdk-group-heading]]:px-3 **:[[cmdk-group-heading]]:py-2 **:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:tracking-wider **:[[cmdk-group-heading]]:text-muted-foreground/60">
+        <Command className="**:[[cmdk-group-heading]]:px-3 **:[[cmdk-group-heading]]:py-2 **:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:tracking-wider **:[[cmdk-group-heading]]:text-foreground/60">
           <div className="flex items-center border-b border-border/50 px-4">
             <CommandInput
               placeholder="Search notes…"
               value={query}
               onValueChange={setQuery}
-              className="flex h-13 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground/50"
+              className="flex h-13 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-foreground/50"
             />
           </div>
           <CommandList className="max-h-95 overflow-y-auto overflow-x-hidden py-1">
-            <CommandEmpty className="py-8 text-center text-sm italic text-muted-foreground/60">
+            <CommandEmpty className="py-8 text-center text-sm italic text-foreground/60">
               {query ? "No results found." : "No recent notes."}
             </CommandEmpty>
 
@@ -94,7 +94,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                     onSelect={() => handleSelect(`/notes/${note.id}`)}
                     className="mx-1 flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors aria-selected:bg-primary/10 aria-selected:text-primary"
                   >
-                    <Clock className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+                    <Clock className="h-3.5 w-3.5 shrink-0 text-foreground/60" />
                     <span className="truncate">{note.title || "Untitled"}</span>
                   </CommandItem>
                 ))}
@@ -111,11 +111,11 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                     onSelect={() => handleSelect(`/notes/${note.id}`)}
                     className="mx-1 flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors aria-selected:bg-primary/10 aria-selected:text-primary"
                   >
-                    <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+                    <FileText className="h-3.5 w-3.5 shrink-0 text-foreground/60" />
                     <div className="flex-1 overflow-hidden">
                       <div className="truncate">{note.title || "Untitled"}</div>
                       {note.content && (
-                        <div className="truncate text-xs text-muted-foreground/60">
+                        <div className="truncate text-xs text-foreground/60">
                           {stripHtml(note.content).slice(0, 80)}
                         </div>
                       )}

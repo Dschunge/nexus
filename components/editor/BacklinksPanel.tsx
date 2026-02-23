@@ -23,7 +23,7 @@ export function BacklinksPanel({ noteId }: BacklinksPanelProps) {
   return (
     <div className="border-t border-border/40">
       <button
-        className="flex w-full items-center gap-2 px-10 py-3 text-xs text-muted-foreground/60 transition-colors hover:text-primary"
+        className="flex w-full items-center gap-2 px-10 py-3 text-xs text-foreground/60 transition-colors hover:text-primary"
         onClick={() => setExpanded((v) => !v)}
       >
         {expanded ? (
@@ -43,7 +43,7 @@ export function BacklinksPanel({ noteId }: BacklinksPanelProps) {
       {expanded && (
         <div className={cn("px-10 pb-6", backlinks.length === 0 && "pb-4")}>
           {backlinks.length === 0 ? (
-            <p className="text-xs italic text-muted-foreground/50">
+            <p className="text-xs italic text-foreground/50">
               No notes link to this one yet.
             </p>
           ) : (
@@ -57,7 +57,7 @@ export function BacklinksPanel({ noteId }: BacklinksPanelProps) {
                     <span className="truncate text-muted-foreground hover:text-foreground">
                       {note.title}
                     </span>
-                    <span className="ml-4 shrink-0 tabular-nums text-xs text-muted-foreground/50">
+                    <span className="ml-4 shrink-0 tabular-nums text-xs text-foreground/50">
                       {formatDistanceToNow(new Date(note.updatedAt))} ago
                     </span>
                   </Link>

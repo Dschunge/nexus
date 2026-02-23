@@ -257,10 +257,10 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
 
       {/* Status bar */}
       <div className="flex items-center justify-between border-t border-border/40 px-8 py-1.5 text-xs">
-        <span className="italic text-muted-foreground/50">
+        <span className="italic text-foreground/50">
           {isSaving ? "Saving…" : ""}
         </span>
-        <span className="tabular-nums text-muted-foreground/70">
+        <span className="tabular-nums text-foreground/70">
           {wordCount.toLocaleString()} {wordCount === 1 ? "word" : "words"}
         </span>
       </div>
