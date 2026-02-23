@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "@/lib/format";
-import { Star, Archive, Trash2, Pin, Download, FileText, FileDown } from "lucide-react";
+import { Star, Archive, Trash2, Pin, Download, FileText, FileDown, X } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -148,8 +148,18 @@ export default function NotePage({
   return (
     <div className="flex h-full flex-col">
       {/* Note meta bar */}
-      <div className="flex items-center justify-between border-b border-border/40 px-8 py-2">
+      <div className="flex items-center justify-between border-b border-border/40 px-4 py-2">
         <div className="flex items-center gap-2 text-xs text-foreground/70">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 shrink-0 text-foreground/60 hover:text-foreground"
+            onClick={() => router.push("/notes")}
+            title="Close note"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+          <div className="h-4 w-px bg-border/50" />
           <span className="tabular-nums">
             {formatDistanceToNow(new Date(note.updatedAt))} ago
           </span>
