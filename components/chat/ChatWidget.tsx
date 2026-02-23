@@ -199,14 +199,14 @@ export function ChatWidget() {
                 }
               }}
               placeholder="Ask about your notes…"
-              className="max-h-32 min-h-10 resize-none border-border/60 bg-background/50 text-sm focus-visible:border-primary/50 focus-visible:ring-primary/20"
+              className="max-h-32 min-h-10 resize-none border-border bg-card text-sm text-foreground placeholder:text-foreground/40 focus-visible:border-primary focus-visible:ring-primary/20"
               rows={1}
             />
             <Button
               size="icon"
               onClick={handleSend}
               disabled={!input.trim() || chat.isPending}
-              className="shrink-0"
+              className="shrink-0 disabled:opacity-100 disabled:cursor-default"
             >
               <Send className="h-4 w-4" />
             </Button>
