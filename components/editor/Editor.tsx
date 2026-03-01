@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { Heading } from "@tiptap/extension-heading";
 import Placeholder from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
@@ -22,7 +23,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { Bold, Italic, Link2, Sparkles, Strikethrough, Heading1, Heading2, Heading3, RemoveFormatting } from "lucide-react";
+import { Bold, Italic, Link2, Sparkles } from "lucide-react";
 import { AICommandMenu } from "./AICommandMenu";
 import { Toolbar } from "./Toolbar";
 import { SlashCommand } from "./SlashCommandExtension";
@@ -30,6 +31,7 @@ import { slashCommandSuggestion } from "./SlashCommandRenderer";
 import { WikiLinkNode } from "./WikiLinkExtension";
 import { WikiLinkSuggestion } from "./WikiLinkSuggestionExtension";
 import { wikiLinkSuggestion } from "./WikiLinkRenderer";
+import { marked } from "marked";
 
 const lowlight = createLowlight(common);
 
@@ -49,6 +51,8 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
   const queryClient = useQueryClient();
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  // Saved ProseMirror range — persists through button focus-steal so onClick can restore it
+  const savedRangeRef = useRef<{ from: number; to: number } | null>(null);
   const [aiMenuOpen, setAiMenuOpen] = useState(false);
   const [selectedText, setSelectedText] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -85,7 +89,9 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
     extensions: [
       StarterKit.configure({
         codeBlock: false,
+        heading: false,
       }),
+      Heading.configure({ levels: [1, 2, 3, 4, 5, 6] }),
       CodeBlockLowlight.configure({
         lowlight,
         defaultLanguage: "plaintext",
@@ -128,15 +134,19 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
       const hasText = from !== to;
       setHasSelection(hasText);
 
-      if (hasText && containerRef.current) {
+      if (hasText) {
+        // Save the ProseMirror range so click handlers can restore it even if
+        // the editor loses focus (and the selection is cleared) before onClick fires.
+        savedRangeRef.current = { from, to };
+
         const selection = window.getSelection();
         if (selection && selection.rangeCount > 0) {
           const range = selection.getRangeAt(0);
           const rect = range.getBoundingClientRect();
-          const containerRect = containerRef.current.getBoundingClientRect();
+          // Use viewport coords for fixed positioning — unaffected by scroll
           setBubblePos({
-            top: rect.top - containerRect.top - 52,
-            left: Math.max(0, rect.left - containerRect.left + rect.width / 2 - 160),
+            top: rect.top - 48,
+            left: Math.max(8, rect.left + rect.width / 2 - 96),
           });
         }
       } else {
@@ -164,11 +174,12 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
   const handleAIResult = useCallback(
     (result: string) => {
       if (!editor) return;
+      const html = marked.parse(result, { async: false }) as string;
       const { from, to } = editor.state.selection;
       if (from !== to) {
-        editor.chain().focus().deleteSelection().insertContent(result).run();
+        editor.chain().focus().deleteSelection().insertContent(html).run();
       } else {
-        editor.chain().focus().insertContent(result).run();
+        editor.chain().focus().insertContent(html).run();
       }
     },
     [editor]
@@ -183,110 +194,69 @@ export function Editor({ noteId, initialContent, onContentChange }: EditorProps)
       {/* Bubble toolbar — pill shaped */}
       {bubblePos && hasSelection && editor && (
         <div
-          className="absolute z-20 flex items-center gap-0.5 rounded-lg border border-border/50 bg-popover/95 px-1.5 py-1 shadow-2xl backdrop-blur-xl"
+          className="fixed z-50 flex items-center gap-0.5 rounded-full border border-border/50 bg-popover/95 px-2 py-1.5 shadow-2xl backdrop-blur-xl"
           style={{ top: bubblePos.top, left: bubblePos.left }}
         >
-          {/* Text size */}
           <Button
             variant="ghost"
             size="sm"
-            className={cn("h-7 w-7 p-0 transition-colors", editor.isActive("heading", { level: 1 }) && "bg-primary/15 text-primary")}
-            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 1 }).run(); }}
-            title="Heading 1"
-          >
-            <Heading1 className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn("h-7 w-7 p-0 transition-colors", editor.isActive("heading", { level: 2 }) && "bg-primary/15 text-primary")}
-            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 2 }).run(); }}
-            title="Heading 2"
-          >
-            <Heading2 className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn("h-7 w-7 p-0 transition-colors", editor.isActive("heading", { level: 3 }) && "bg-primary/15 text-primary")}
-            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 3 }).run(); }}
-            title="Heading 3"
-          >
-            <Heading3 className="h-3.5 w-3.5" />
-          </Button>
-
-          <div className="mx-0.5 h-4 w-px bg-border/60" />
-
-          {/* Inline marks */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn("h-7 w-7 p-0 transition-colors", editor.isActive("bold") && "bg-primary/15 text-primary")}
-            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBold().run(); }}
-            title="Bold"
+            className={cn(
+              "h-7 w-7 rounded-full p-0 transition-colors",
+              editor.isActive("bold") && "bg-primary/15 text-primary"
+            )}
+            onMouseDownCapture={(e) => e.preventDefault()}
+            onClick={() => {
+              const r = savedRangeRef.current;
+              const chain = editor.chain().focus();
+              (r ? chain.setTextSelection(r) : chain).toggleBold().run();
+            }}
           >
             <Bold className="h-3.5 w-3.5" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className={cn("h-7 w-7 p-0 transition-colors", editor.isActive("italic") && "bg-primary/15 text-primary")}
-            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleItalic().run(); }}
-            title="Italic"
+            className={cn(
+              "h-7 w-7 rounded-full p-0 transition-colors",
+              editor.isActive("italic") && "bg-primary/15 text-primary"
+            )}
+            onMouseDownCapture={(e) => e.preventDefault()}
+            onClick={() => {
+              const r = savedRangeRef.current;
+              const chain = editor.chain().focus();
+              (r ? chain.setTextSelection(r) : chain).toggleItalic().run();
+            }}
           >
             <Italic className="h-3.5 w-3.5" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className={cn("h-7 w-7 p-0 transition-colors", editor.isActive("strike") && "bg-primary/15 text-primary")}
-            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleStrike().run(); }}
-            title="Strikethrough"
-          >
-            <Strikethrough className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn("h-7 w-7 p-0 transition-colors", editor.isActive("link") && "bg-primary/15 text-primary")}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              if (editor.isActive("link")) {
-                editor.chain().focus().unsetLink().run();
-              } else {
-                const url = prompt("URL:");
-                if (url) editor.chain().focus().setLink({ href: url }).run();
-              }
+            className={cn(
+              "h-7 w-7 rounded-full p-0 transition-colors",
+              editor.isActive("link") && "bg-primary/15 text-primary"
+            )}
+            onMouseDownCapture={(e) => e.preventDefault()}
+            onClick={() => {
+              const url = prompt("URL:");
+              if (url) editor.chain().focus().setLink({ href: url }).run();
             }}
-            title="Link"
           >
             <Link2 className="h-3.5 w-3.5" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0 transition-colors"
-            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().clearNodes().unsetAllMarks().run(); }}
-            title="Clear formatting"
-          >
-            <RemoveFormatting className="h-3.5 w-3.5" />
-          </Button>
-
           <div className="mx-0.5 h-4 w-px bg-border/60" />
-
-          {/* AI */}
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 w-7 p-0 text-primary transition-colors hover:bg-primary/15"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              const { from, to } = editor.state.selection;
-              const text = editor.state.doc.textBetween(from, to, " ");
+            className="h-7 w-7 rounded-full p-0 text-primary transition-colors hover:bg-primary/15"
+            onMouseDownCapture={(e) => e.preventDefault()}
+            onClick={() => {
+              const r = savedRangeRef.current;
+              if (!r) return;
+              const text = editor.state.doc.textBetween(r.from, r.to, " ");
               setSelectedText(text);
               setAiMenuOpen(true);
             }}
-            title="AI Assistant"
           >
             <Sparkles className="h-3.5 w-3.5" />
           </Button>

@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import {
@@ -209,9 +208,9 @@ export function AICommandMenu({
           </div>
         ) : (
           <div className="flex min-h-0 flex-1 flex-col gap-4">
-            <ScrollArea className="min-h-0 flex-1 rounded-lg border border-border/50 bg-muted/30 p-4">
+            <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border border-border/50 bg-muted/30 p-4">
               <p className="whitespace-pre-wrap text-sm leading-relaxed">{result}</p>
-            </ScrollArea>
+            </div>
             <div className="flex shrink-0 gap-2">
               <Button onClick={handleAccept} className="flex-1">
                 Accept
