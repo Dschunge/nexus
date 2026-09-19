@@ -47,15 +47,7 @@ export default function SignupPage() {
       <div className="relative z-10 w-full max-w-sm space-y-8 px-4">
         {/* Wordmark */}
         <div className="space-y-2 text-center">
-          <h1
-            className="text-6xl text-foreground"
-            style={{
-              fontFamily: "var(--font-playfair), Georgia, serif",
-              fontWeight: 700,
-              fontStyle: "italic",
-              letterSpacing: "-0.02em",
-            }}
-          >
+          <h1 className="text-5xl font-semibold tracking-tight text-foreground">
             Nexus
           </h1>
           <p className="text-sm text-muted-foreground">
