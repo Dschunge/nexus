@@ -5,7 +5,7 @@ Advanced note-taking app for developers and power users. Built with a keyboard-f
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss)
-![Prisma](https://img.shields.io/badge/Prisma-v5-2D3748?logo=prisma)
+![Prisma](https://img.shields.io/badge/Prisma-v7-2D3748?logo=prisma)
 
 ## Features
 
@@ -14,6 +14,7 @@ Advanced note-taking app for developers and power users. Built with a keyboard-f
 - **Command palette** — `Ctrl+K` for instant full-text note search and quick actions
 - **Autosave** — every keystroke debounced and saved within 1 second
 - **Folders & tags** — nested folder tree, tag management
+- **Links library** — save any URL; Firecrawl fetches the page and Claude suggests a title, description, category and sub-category, all editable before saving
 - **Dark mode by default** — respects system preference, toggleable
 
 ## Stack
@@ -24,9 +25,10 @@ Advanced note-taking app for developers and power users. Built with a keyboard-f
 | Editor | Tiptap (ProseMirror) |
 | Styling | Tailwind CSS v4 + shadcn/ui |
 | API | tRPC v11 + TanStack Query |
-| Database | PostgreSQL via Prisma v5 |
+| Database | PostgreSQL via Prisma v7 |
 | Auth | Better-Auth (email/password) |
 | AI | Anthropic Claude API (`claude-sonnet-4-6`) |
+| Link fetching | Firecrawl (`/scrape`) |
 | Package manager | pnpm |
 
 ## Getting Started
@@ -55,9 +57,10 @@ BETTER_AUTH_SECRET=your-32-char-secret
 BETTER_AUTH_URL=http://localhost:3000
 ANTHROPIC_API_KEY=sk-ant-...
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+FIRECRAWL_API_KEY=fc-...
 ```
 
-Get an Anthropic API key at [platform.claude.com](https://platform.claude.com).
+Get an Anthropic API key at [platform.claude.com](https://platform.claude.com) and a Firecrawl key at [firecrawl.dev](https://www.firecrawl.dev) (used by the Links library; without it links can still be added manually).
 
 ### 3. Set up the database
 
@@ -92,16 +95,20 @@ nexus/
 ├── app/
 │   ├── (auth)/login & signup    # Auth pages
 │   ├── (app)/notes/[id]         # Note editor view
+│   ├── (app)/links              # Links library
 │   └── api/auth & trpc          # API routes
 ├── components/
 │   ├── editor/                  # Tiptap editor, toolbar, AI menu, slash commands
 │   ├── sidebar/                 # Sidebar, folder tree
-│   └── search/                  # Command palette
+│   ├── search/                  # Command palette
+│   └── links/                   # Add-link dialog, link cards, category filter
 ├── lib/
 │   ├── auth.ts                  # Better-Auth config
 │   ├── db.ts                    # Prisma client
 │   ├── anthropic.ts             # Claude client
-│   └── trpc/                    # tRPC routers (notes, folders, tags, ai)
+│   ├── firecrawl.ts             # Firecrawl client (page scraping)
+│   ├── links/                   # URL normalization, categories, Claude classification
+│   └── trpc/                    # tRPC routers (notes, folders, tags, ai, links)
 └── prisma/schema.prisma         # Database schema
 ```
 

@@ -21,6 +21,7 @@ model User {
   folders       Folder[]
   notes         Note[]
   tags          Tag[]
+  links         Link[]
 }
 
 model Session {
@@ -118,4 +119,39 @@ model NoteVersion {
   note      Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
   content   String
   createdAt DateTime @default(now())
+}
+
+enum LinkCategory {
+  DEVELOPMENT
+  DOCUMENTATION
+  ARTICLE
+  VIDEO
+  TOOL
+  DESIGN
+  LEARNING
+  SOCIAL
+  SHOPPING
+  OTHER
+}
+
+model Link {
+  id          String       @id @default(cuid())
+  url         String // normalized, see lib/links/normalizeUrl.ts
+  domain      String // hostname without "www."
+  title       String
+  description String       @default("")
+  category    LinkCategory @default(OTHER)
+  subCategory String?
+  faviconUrl  String?
+  ogImageUrl  String?
+  siteName    String?
+  content     String       @default("") // Firecrawl markdown, capped at 10 000 chars (for search)
+  fetchedAt   DateTime? // null when added manually / fetch failed
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([url, userId])
+  @@index([userId, category])
 }

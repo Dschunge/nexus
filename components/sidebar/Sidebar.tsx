@@ -26,6 +26,7 @@ import {
   Upload,
   X,
   GitFork,
+  Link2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -157,6 +158,20 @@ export function Sidebar() {
             title="Search (Ctrl+K)"
           >
             <Search className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "h-8 w-8 text-foreground/60 hover:text-foreground",
+              pathname.startsWith("/links") && "text-primary"
+            )}
+            asChild
+            title="Links"
+          >
+            <Link href="/links">
+              <Link2 className="h-4 w-4" />
+            </Link>
           </Button>
         </div>
         <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
@@ -358,6 +373,16 @@ export function Sidebar() {
 
         {/* Footer */}
         <div className="border-t border-border/40 p-2">
+          <Link
+            href="/links"
+            className={cn(
+              "flex w-full items-center rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-primary/8 hover:text-foreground",
+              pathname.startsWith("/links") && "bg-primary/10 text-primary"
+            )}
+          >
+            <Link2 className="mr-2 h-3.5 w-3.5" />
+            Links
+          </Link>
           <Link
             href="/graph"
             className={cn(

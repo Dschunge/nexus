@@ -10,8 +10,8 @@ pnpm build         # Production build
 pnpm start         # Start production server
 
 pnpm prisma db push          # Push schema changes to DB (no migration files)
+pnpm prisma generate         # Regenerate Prisma client — run after every schema change (db push no longer does it in Prisma 7; also runs on postinstall)
 pnpm prisma studio           # Open Prisma Studio GUI
-pnpm prisma generate         # Regenerate Prisma client after schema change (also runs on postinstall)
 ```
 
 > **Always use `pnpm`** — never npm or yarn.
@@ -28,6 +28,7 @@ BETTER_AUTH_SECRET=<32-char secret>
 BETTER_AUTH_URL=http://localhost:3000
 ANTHROPIC_API_KEY=sk-ant-...
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+FIRECRAWL_API_KEY=fc-...
 ```
 
 `BETTER_AUTH_URL` and `NEXT_PUBLIC_APP_URL` must match the port the dev server actually runs on (default 3000) — `lib/auth.ts` uses `BETTER_AUTH_URL` for `baseURL` and `trustedOrigins`.
@@ -65,7 +66,7 @@ Browser → Next.js App Router
 ### tRPC
 
 - **`lib/trpc/init.ts`** — defines `createTRPCContext` (reads Better-Auth session + injects Prisma), `publicProcedure`, and `protectedProcedure`
-- **`lib/trpc/router.ts`** — root `AppRouter` composed of `notes`, `folders`, `tags`, `ai` sub-routers
+- **`lib/trpc/router.ts`** — root `AppRouter` composed of `notes`, `folders`, `tags`, `ai`, `links` sub-routers
 - **`lib/trpc/client.tsx`** — client-side `TRPCReactProvider`, exposes `useTRPC` hook (from `@trpc/tanstack-react-query`)
 - In client components: `trpc.xxx.queryOptions()` for queries, `trpc.xxx.mutationOptions()` for mutations
 - `notes.search` is a **query** (not mutation) — uses Postgres full-text search via raw SQL
@@ -102,11 +103,23 @@ Browser → Next.js App Router
 - Procedures: `rewrite`, `summarize`, `continue`, `explain`, `fixCode`, `custom` (all mutations), `chat` (mutation with history array)
 - `ai.chat` does full-text note retrieval first, falls back to most recent 6 notes when search returns nothing
 
+### Links library (`lib/links/`, `lib/trpc/routers/links.ts`, `components/links/`)
+
+- Plan and rationale: `docs/plan-links.md`
+- Flow: `links.preview` (mutation — it spends a Firecrawl credit) → `lib/links/fetchAndClassify.ts` = `lib/firecrawl.ts` `scrapePage` (markdown + metadata) → `lib/links/classify.ts` (Claude **tool-use** with the category enum in the tool schema, so the result is structurally valid) → editable form → `links.create`
+- `lib/links/normalizeUrl.ts` — canonical URL (tracking params, hash, casing, trailing slash stripped) is the value stored in `Link.url` and the per-user uniqueness key (`@@unique([url, userId])`); `preview` checks duplicates **before** scraping
+- `Link.category` is a Prisma enum; `lib/links/categories.ts` mirrors it with `LINK_CATEGORY_META` (`Record<LinkCategory, …>` so TS fails if they diverge). Adding a category = schema + `db push` + `generate` + meta entry + icon in `components/links/categoryIcons.ts`
+- Classification failure degrades to raw metadata (`classified: false`) rather than failing the fetch; Firecrawl errors map to `TIMEOUT` / `BAD_GATEWAY` / `PRECONDITION_FAILED` (key missing) in the router, and the dialog offers "Add manually"
+- Favicons / og:images are stored as URLs and rendered with plain `<img referrerPolicy="no-referrer">` (`LinkFavicon`), not `next/image`
+- `firecrawl` SDK bundles zod 3 while the project uses zod 4 — never pass Zod schemas to the SDK
+- Client invalidation after create/update/delete: `queryClient.invalidateQueries(trpc.links.pathFilter())`
+
 ### Sidebar & navigation (`components/sidebar/`)
 
 - **`Sidebar.tsx`** — collapsible; sections: Favorites, Recents, Folders, Tags, Trash
 - **`FolderTree.tsx`** — recursive folder rendering with drag-and-drop ordering
-- **`CommandPalette.tsx`** — `Ctrl+K` quick switcher backed by `notes.search`
+- **`CommandPalette.tsx`** — `Ctrl+K` quick switcher backed by `notes.search` (+ a "Links" group from `links.list` and an "Add link" action → `/links?add=1`)
+- **`/links`** page (`app/(app)/links/page.tsx`) — reachable from the sidebar footer; grid of `LinkCard`s with `CategoryFilter` chips and search
 - **`GraphView.tsx`** — D3 force-directed graph using `notes.graph` (nodes = notes, links = wiki-link edges)
 - **`ChatWidget.tsx`** — floating chat panel backed by `ai.chat`
 

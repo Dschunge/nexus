@@ -14,7 +14,8 @@ import {
   CommandSeparator,
 } from "cmdk";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Clock, FileText, Plus } from "lucide-react";
+import { Clock, FileText, Link2, Plus } from "lucide-react";
+import { LinkFavicon } from "@/components/links/LinkFavicon";
 import { toast } from "sonner";
 
 interface CommandPaletteProps {
@@ -40,6 +41,11 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   });
 
   const { data: recents } = useQuery(trpc.notes.recents.queryOptions());
+
+  const { data: linkResults } = useQuery({
+    ...trpc.links.list.queryOptions({ search: debouncedQuery }),
+    enabled: debouncedQuery.trim().length > 0,
+  });
 
   const createNote = useMutation(
     trpc.notes.create.mutationOptions({
@@ -73,7 +79,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         <Command className="**:[[cmdk-group-heading]]:px-3 **:[[cmdk-group-heading]]:py-2 **:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:tracking-wider **:[[cmdk-group-heading]]:text-foreground/60">
           <div className="flex items-center border-b border-border/50 px-4">
             <CommandInput
-              placeholder="Search notes…"
+              placeholder="Search notes and links…"
               value={query}
               onValueChange={setQuery}
               className="flex h-13 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-foreground/50"
@@ -125,6 +131,29 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
               </CommandGroup>
             )}
 
+            {query !== "" && linkResults && linkResults.length > 0 && (
+              <CommandGroup heading="Links">
+                {linkResults.slice(0, 5).map((link) => (
+                  <CommandItem
+                    key={link.id}
+                    value={`link-${link.id}`}
+                    onSelect={() => {
+                      window.open(link.url, "_blank", "noopener,noreferrer");
+                      onOpenChange(false);
+                      setQuery("");
+                    }}
+                    className="mx-1 flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors aria-selected:bg-primary/10 aria-selected:text-primary"
+                  >
+                    <LinkFavicon src={link.faviconUrl} domain={link.domain} className="h-3.5 w-3.5" />
+                    <div className="flex-1 overflow-hidden">
+                      <div className="truncate">{link.title}</div>
+                      <div className="truncate text-xs text-foreground/60">{link.domain}</div>
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+
             <CommandSeparator className="my-1 opacity-30" />
 
             <CommandGroup heading="Actions">
@@ -137,6 +166,14 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
               >
                 <Plus className="h-3.5 w-3.5 text-primary" />
                 <span>New note{query ? `: "${query}"` : ""}</span>
+              </CommandItem>
+              <CommandItem
+                value="add-link-action"
+                onSelect={() => handleSelect("/links?add=1")}
+                className="mx-1 flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors aria-selected:bg-primary/10 aria-selected:text-primary"
+              >
+                <Link2 className="h-3.5 w-3.5 text-primary" />
+                <span>Add link</span>
               </CommandItem>
             </CommandGroup>
           </CommandList>
