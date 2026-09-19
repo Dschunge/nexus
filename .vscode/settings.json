@@ -1,0 +1,7 @@
+{
+  // Use the project's TypeScript (node_modules) so editor diagnostics match
+  // `tsc` and `next build`. VS Code's bundled TS 6 enables checks (e.g.
+  // noUncheckedSideEffectImports) that the project's TS 5.9 does not.
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
+}
