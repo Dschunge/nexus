@@ -18,6 +18,10 @@ pnpm prisma studio           # Open Prisma Studio GUI
 >
 > **Node:** requires ≥ 22.18 (Prisma 7 CLI). `.nvmrc` pins Node 22 — run `nvm use` in `nexus/` first.
 
+## Deployment
+
+`Dockerfile` (standalone Next.js build; `docker/entrypoint.sh` runs `prisma db push` before starting) → GitHub Actions publishes `ghcr.io/dschunge/nexus:<sha>` → Portainer stack from `deploy/docker-compose.yml` behind Nginx Proxy Manager. Full steps and gotchas: `deploy/README.md`. `DISABLE_SIGNUP=true` (read per request; `lib/signup.ts`) locks registration on the public instance.
+
 ## Environment
 
 Create `.env` at `nexus/`:

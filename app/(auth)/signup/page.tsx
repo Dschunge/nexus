@@ -1,108 +1,12 @@
-"use client";
+import { redirect } from "next/navigation";
+import { SignupForm } from "@/components/auth/SignupForm";
+import { isSignupDisabled } from "@/lib/signup";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { signUp } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+// Rendered per request, not at build time: DISABLE_SIGNUP is read from the
+// container environment and must not be frozen into a prerendered page.
+export const dynamic = "force-dynamic";
 
 export default function SignupPage() {
-  const router = useRouter();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      const result = await signUp.email({ name, email, password });
-      if (result.error) {
-        setError(result.error.message ?? "Sign up failed");
-      } else {
-        router.push("/notes");
-      }
-    } catch {
-      setError("An unexpected error occurred");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background">
-      {/* Atmospheric background glow */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 70% 55% at 68% 12%, oklch(0.22 0.06 63 / 0.45) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 12% 88%, oklch(0.18 0.04 152 / 0.25) 0%, transparent 70%)",
-        }}
-      />
-
-      <div className="relative z-10 w-full max-w-sm space-y-8 px-4">
-        {/* Wordmark */}
-        <div className="space-y-2 text-center">
-          <h1 className="text-5xl font-semibold tracking-tight text-foreground">
-            Nexus
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Create your knowledge base
-          </p>
-        </div>
-
-        {/* Card */}
-        <div className="rounded-2xl border border-border/50 bg-card/60 p-7 shadow-2xl backdrop-blur-xl">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              type="text"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              autoFocus
-              className="border-border/60 bg-background/50 focus-visible:border-primary/50 focus-visible:ring-primary/20"
-            />
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="border-border/60 bg-background/50 focus-visible:border-primary/50 focus-visible:ring-primary/20"
-            />
-            <Input
-              type="password"
-              placeholder="Password (min 8 characters)"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-              className="border-border/60 bg-background/50 focus-visible:border-primary/50 focus-visible:ring-primary/20"
-            />
-            {error && (
-              <p className="text-sm text-destructive">{error}</p>
-            )}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating account…" : "Create account"}
-            </Button>
-          </form>
-        </div>
-
-        <p className="text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <Link
-            href="/login"
-            className="text-primary underline-offset-4 hover:underline"
-          >
-            Sign in
-          </Link>
-        </p>
-      </div>
-    </div>
-  );
+  if (isSignupDisabled()) redirect("/login");
+  return <SignupForm />;
 }

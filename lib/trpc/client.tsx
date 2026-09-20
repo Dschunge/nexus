@@ -35,7 +35,12 @@ export function TRPCReactProvider({ children }: { children: React.ReactNode }) {
     createTRPCClient<AppRouter>({
       links: [
         httpBatchLink({
-          url: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/trpc`,
+          // Relative in the browser so the image is not tied to one hostname;
+          // the server-side render needs an absolute URL.
+          url:
+            typeof window !== "undefined"
+              ? "/api/trpc"
+              : `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/trpc`,
           transformer: superjson,
         }),
       ],

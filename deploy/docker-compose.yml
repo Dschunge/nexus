@@ -1,0 +1,63 @@
+# Nexus - VPS deployment, as a Portainer stack.
+#
+#   Networks
+#     postgresql-7tjt_default   joins the existing Postgres stack. The app
+#                               reaches it as
+#                               "postgresql-7tjt-postgresql-1:5432" (the
+#                               CONTAINER name - the short alias "postgresql"
+#                               does not resolve on that network).
+#     proxy                     joins Nginx Proxy Manager. NPM forwards BY
+#                               CONTAINER NAME over this network
+#                               (nexus:3000), never to 127.0.0.1 - inside
+#                               NPM's own container that address is NPM.
+#
+#   Both are external: this stack uses them, it does not own them.
+#
+#   TAG
+#     Required, no default. Set it to the short commit SHA the image was
+#     built from - the "Publish image" workflow prints it in its summary.
+#     ":latest" is deliberately not used: Portainer re-pulls the repository
+#     but reuses the image it already has, so a redeploy reports success
+#     while running yesterday's build.
+#
+#   Service name
+#     Compose gives every service a network alias equal to its name on every
+#     network it joins, so on the shared proxy network the name must be
+#     unique across the whole host. "nexus" is; a generic "app" or "web"
+#     would collide with the other stacks.
+
+services:
+  nexus:
+    image: ghcr.io/dschunge/nexus:${TAG:?set TAG to the commit SHA of the image to deploy}
+    container_name: nexus
+    restart: unless-stopped
+    ports:
+      # For reaching the app from a shell on the VPS only. NPM does not use
+      # this - it forwards to nexus:3000 over the proxy network.
+      - '127.0.0.1:3320:3000'
+    environment:
+      # No quotes on any value: Portainer passes them through verbatim and a
+      # quoted URL keeps its quote characters.
+      DATABASE_URL: ${DATABASE_URL}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      # Public origin. Better-Auth's baseURL and its only trusted origin in
+      # production; a mismatch rejects every login with an origin error.
+      BETTER_AUTH_URL: https://nexus.aigentik.org
+      NEXT_PUBLIC_APP_URL: https://nexus.aigentik.org
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      FIRECRAWL_API_KEY: ${FIRECRAWL_API_KEY}
+      # Leave unset for the first deploy, create your account, then set it to
+      # true and redeploy. Anyone who can reach the URL can otherwise register
+      # and use the AI features on the keys above.
+      DISABLE_SIGNUP: ${DISABLE_SIGNUP:-false}
+    networks:
+      - postgres
+      - proxy
+
+networks:
+  postgres:
+    external: true
+    name: postgresql-7tjt_default
+  proxy:
+    external: true
+    name: proxy

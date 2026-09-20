@@ -1,0 +1,19 @@
+# The image builds from source; everything below is regenerated in the build
+# stage or must not be in an image at all.
+node_modules
+.next
+lib/generated
+.git
+.github
+docs
+deploy
+*.md
+tsconfig.tsbuildinfo
+
+# Never. The container is configured from the environment; a baked-in .env
+# would silently win over it.
+.env
+.env.*
+
+.vscode
+*.log

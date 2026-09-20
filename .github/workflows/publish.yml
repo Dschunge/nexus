@@ -1,0 +1,72 @@
+# Builds the Nexus image and pushes it to GHCR as ghcr.io/dschunge/nexus:<sha>,
+# the same way the other apps on the VPS are deployed. Portainer pulls a
+# tag; it never builds, so a broken build fails here where it can be read.
+name: Publish image
+
+on:
+  push:
+    branches: [main]
+    # Skip when a push touches nothing the image contains. An allow-list of
+    # things to ignore, deliberately narrow: the failure mode of a too-broad
+    # list is a change that should have built an image, with a green tick.
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'deploy/**'
+      - '.gitignore'
+      - '.vscode/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE: nexus
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE }}
+          # Short SHA with no prefix, so the tag is exactly what
+          # `git log --oneline` shows and pastes straight into the stack's TAG.
+          # latest is published for convenience but the stack requires an
+          # explicit TAG - a stale latest deploys old code while reporting
+          # success.
+          tags: |
+            type=sha,format=short,prefix=
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Show the tag to deploy
+        run: |
+          echo "### Deploy \`${{ env.IMAGE }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Set the stack variable \`TAG\` to:" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "${GITHUB_SHA::7}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
