@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { signOut } from "@/lib/auth-client";
 import { FolderTree } from "./FolderTree";
 import { CommandPalette } from "@/components/search/CommandPalette";
+import { ThemeToggle } from "@/components/sidebar/ThemeToggle";
 import {
   FileText,
   FolderPlus,
@@ -393,6 +394,7 @@ export function Sidebar() {
             <GitFork className="mr-2 h-3.5 w-3.5" />
             Graph view
           </Link>
+          <ThemeToggle />
           <Button
             variant="ghost"
             size="sm"

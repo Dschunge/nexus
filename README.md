@@ -15,7 +15,7 @@ Advanced note-taking app for developers and power users. Built with a keyboard-f
 - **Autosave** — every keystroke debounced and saved within 1 second
 - **Folders & tags** — nested folder tree, tag management
 - **Links library** — save any URL; Firecrawl fetches the page and Claude suggests a title, description, category and sub-category, all editable before saving
-- **Dark mode by default** — respects system preference, toggleable
+- **Light & dark mode** — light by default, toggle in the sidebar; the choice is remembered per browser
 
 ## Stack
 
