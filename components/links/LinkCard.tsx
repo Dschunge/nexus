@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LinkFavicon } from "@/components/links/LinkFavicon";
+import { LinkThumbnail } from "@/components/links/LinkThumbnail";
 import { CATEGORY_ICONS } from "@/components/links/categoryIcons";
 import type { LinkFormValues } from "@/components/links/AddLinkDialog";
 import { LINK_CATEGORY_META } from "@/lib/links/categories";
@@ -59,8 +59,16 @@ export function LinkCard({ link, onEdit }: Props) {
 
   return (
     <div className="group flex flex-col gap-2 rounded-lg border border-border/60 bg-card p-3 transition-colors hover:border-border">
+      <a href={link.url} target="_blank" rel="noopener noreferrer">
+        <LinkThumbnail
+          ogImageUrl={link.ogImageUrl}
+          faviconUrl={link.faviconUrl}
+          domain={link.domain}
+          className="transition-opacity hover:opacity-90"
+        />
+      </a>
+
       <div className="flex items-start gap-2">
-        <LinkFavicon src={link.faviconUrl} domain={link.domain} className="mt-0.5" />
         <a
           href={link.url}
           target="_blank"
