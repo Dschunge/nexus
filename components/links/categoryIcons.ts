@@ -1,6 +1,7 @@
 import {
   BookOpen,
   Code2,
+  Cuboid,
   GraduationCap,
   Link2,
   MessageCircle,
@@ -22,6 +23,7 @@ export const CATEGORY_ICONS: Record<LinkCategory, LucideIcon> = {
   VIDEO: Video,
   TOOL: Wrench,
   DESIGN: Palette,
+  THREE_D_PRINTING: Cuboid,
   LEARNING: GraduationCap,
   SOCIAL: MessageCircle,
   SHOPPING: ShoppingCart,

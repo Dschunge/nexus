@@ -132,6 +132,11 @@ enum LinkCategory {
   SOCIAL
   SHOPPING
   OTHER
+  // Append new values at the end. Inserting one in the middle makes Postgres
+  // rewrite the type, which `prisma db push` refuses non-interactively on a
+  // database with rows — and it runs on every container start. Display order
+  // lives in lib/links/categories.ts instead.
+  THREE_D_PRINTING
 }
 
 model Link {
