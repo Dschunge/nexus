@@ -113,7 +113,7 @@ export function ChatWidget() {
         </div>
 
         {/* Messages */}
-        <ScrollArea className="flex-1 px-4 py-4">
+        <ScrollArea className="min-h-0 flex-1 px-4 py-4">
           {messages.length === 0 ? (
             <div className="mt-16 space-y-2 text-center">
               <p className="text-lg text-foreground">

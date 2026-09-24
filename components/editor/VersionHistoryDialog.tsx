@@ -118,7 +118,7 @@ export function VersionHistoryDialog({ noteId }: Props) {
 
             {/* Preview + restore */}
             <div className="flex flex-1 flex-col overflow-hidden">
-              <ScrollArea className="flex-1">
+              <ScrollArea className="min-h-0 flex-1">
                 {selected && (
                   <div
                     className="prose prose-sm dark:prose-invert max-w-none p-6"

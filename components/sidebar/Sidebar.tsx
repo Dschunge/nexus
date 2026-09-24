@@ -245,7 +245,7 @@ export function Sidebar() {
           />
         </div>
 
-        <ScrollArea className="flex-1">
+        <ScrollArea className="min-h-0 flex-1">
           <div className="space-y-1 px-2 pb-4">
             {/* Favorites */}
             {favorites && favorites.length > 0 && (

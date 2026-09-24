@@ -69,7 +69,7 @@ function LinksPageContent() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center gap-3 border-b border-border px-6 py-3">
+      <div className="flex shrink-0 items-center gap-3 border-b border-border px-6 py-3">
         <h1 className="text-sm font-semibold">Links</h1>
         <span className="text-xs text-muted-foreground">
           {counts?.total ?? 0} {counts?.total === 1 ? "link" : "links"}
@@ -89,7 +89,7 @@ function LinksPageContent() {
         </Button>
       </div>
 
-      <div className="border-b border-border/40 px-6 py-2.5">
+      <div className="shrink-0 border-b border-border/40 px-6 py-2.5">
         <CategoryFilter
           value={category}
           onChange={setCategory}
@@ -98,7 +98,10 @@ function LinksPageContent() {
         />
       </div>
 
-      <ScrollArea className="flex-1">
+      {/* min-h-0 is required: a flex child defaults to min-height:auto, so
+          without it the ScrollArea grows to its content height instead of
+          the leftover space and the list is clipped with no scrollbar. */}
+      <ScrollArea className="min-h-0 flex-1">
         <div className="p-6">
           {isLoading ? (
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
