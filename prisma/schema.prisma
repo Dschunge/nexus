@@ -137,6 +137,7 @@ enum LinkCategory {
   // database with rows — and it runs on every container start. Display order
   // lives in lib/links/categories.ts instead.
   THREE_D_PRINTING
+  AIGENTIK
 }
 
 model Link {

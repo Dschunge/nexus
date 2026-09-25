@@ -8,6 +8,7 @@ export { LinkCategory };
 // in schema.prisma), so a new category would otherwise always land last.
 // The check below fails the build if a value is missing here.
 const CATEGORY_ORDER = [
+  LinkCategory.AIGENTIK,
   LinkCategory.DEVELOPMENT,
   LinkCategory.DOCUMENTATION,
   LinkCategory.ARTICLE,
@@ -39,6 +40,11 @@ export const LINK_CATEGORY_META: Record<
   LinkCategory,
   { label: string; description: string }
 > = {
+  AIGENTIK: {
+    label: "Aigentik",
+    description:
+      "Our own apps and services, which all live on aigentik.org or one of its subdomains (nexus.aigentik.org, panic.aigentik.org, panicapp.aigentik.org, panic-api.aigentik.org, …). Any page whose domain is aigentik.org or ends in .aigentik.org belongs here, whatever the page itself is about — this takes precedence over every other category",
+  },
   DEVELOPMENT: {
     label: "Development",
     description:

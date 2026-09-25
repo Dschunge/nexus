@@ -1,4 +1,5 @@
 import {
+  Blocks,
   BookOpen,
   Code2,
   Cuboid,
@@ -17,6 +18,7 @@ import type { LinkCategory } from "@/lib/links/categories";
 // Kept apart from lib/links/categories.ts so the server module stays free of
 // icon imports.
 export const CATEGORY_ICONS: Record<LinkCategory, LucideIcon> = {
+  AIGENTIK: Blocks,
   DEVELOPMENT: Code2,
   DOCUMENTATION: BookOpen,
   ARTICLE: Newspaper,
