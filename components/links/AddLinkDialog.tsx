@@ -38,6 +38,8 @@ export interface LinkFormValues {
   subCategory: string | null;
   faviconUrl: string | null;
   ogImageUrl: string | null;
+  /** Signed URL from the last fetch; absent when editing without a refetch. */
+  screenshotUrl?: string | null;
   siteName: string | null;
   content?: string;
   fetchedAt?: Date | null;
@@ -167,6 +169,7 @@ export function AddLinkDialog({ open, onOpenChange, initial }: Props) {
       subCategory: null,
       faviconUrl: faviconFallbackUrl(domain),
       ogImageUrl: null,
+      screenshotUrl: null,
       siteName: null,
       content: "",
       fetchedAt: null,
@@ -186,6 +189,8 @@ export function AddLinkDialog({ open, onOpenChange, initial }: Props) {
         subCategory,
         faviconUrl: values.faviconUrl,
         ogImageUrl: values.ogImageUrl,
+        // Only a refetch sets this; a plain edit leaves the stored one alone.
+        screenshotUrl: values.screenshotUrl ?? undefined,
         siteName: values.siteName,
         content: values.content,
         fetchedAt: values.fetchedAt,
@@ -260,10 +265,10 @@ export function AddLinkDialog({ open, onOpenChange, initial }: Props) {
               }}
             >
               <div className="flex items-center gap-3 rounded-md border border-border/60 bg-muted/30 p-2.5">
-                {values.ogImageUrl ? (
+                {values.ogImageUrl || values.screenshotUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={values.ogImageUrl}
+                    src={values.ogImageUrl ?? values.screenshotUrl!}
                     alt=""
                     referrerPolicy="no-referrer"
                     className="h-[54px] w-24 shrink-0 rounded object-cover"

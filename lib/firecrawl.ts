@@ -31,7 +31,17 @@ export interface ScrapedPage {
   favicon: string | null;
   sourceURL: string | null;
   statusCode: number | null;
+  /**
+   * Viewport screenshot as a signed storage URL. It expires, so it is only
+   * good for downloading right away (lib/links/screenshot.ts), never for
+   * storing.
+   */
+  screenshot: string | null;
 }
+
+// A laptop-ish viewport: wide enough that sites render their desktop layout,
+// short enough that the hero fills the card thumbnail.
+export const SCREENSHOT_VIEWPORT = { width: 1280, height: 800 } as const;
 
 // Metadata values are typed as strings but the API occasionally sends arrays
 // (e.g. multiple og:image tags); keep the first.
@@ -54,7 +64,11 @@ function first(value: unknown): string | null {
  */
 export async function scrapePage(url: string): Promise<ScrapedPage> {
   const doc = await getFirecrawlClient().scrape(url, {
-    formats: ["markdown"],
+    // The screenshot rides along on the same credit as the markdown.
+    formats: [
+      "markdown",
+      { type: "screenshot", fullPage: false, viewport: SCREENSHOT_VIEWPORT },
+    ],
     onlyMainContent: true,
     timeout: SCRAPE_TIMEOUT_MS,
   });
@@ -71,5 +85,6 @@ export async function scrapePage(url: string): Promise<ScrapedPage> {
     favicon: first(m.favicon),
     sourceURL: first(m.sourceURL),
     statusCode: typeof m.statusCode === "number" ? m.statusCode : null,
+    screenshot: first(doc.screenshot),
   };
 }

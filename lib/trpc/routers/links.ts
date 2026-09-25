@@ -10,6 +10,7 @@ import {
   ScrapeFailedError,
 } from "@/lib/links/fetchAndClassify";
 import { FirecrawlNotConfiguredError, FirecrawlSdkError } from "@/lib/firecrawl";
+import { storeScreenshot } from "@/lib/links/screenshot";
 
 const linkFields = z.object({
   title: z.string().trim().min(1).max(200),
@@ -18,6 +19,9 @@ const linkFields = z.object({
   subCategory: z.string().trim().max(60).nullable().optional(),
   faviconUrl: z.url().nullable().optional(),
   ogImageUrl: z.url().nullable().optional(),
+  // Not a column: the signed URL from the last fetch. Present → the server
+  // downloads it into LinkScreenshot; absent/null → the stored one is kept.
+  screenshotUrl: z.url().nullable().optional(),
   siteName: z.string().max(200).nullable().optional(),
   content: z.string().max(MAX_STORED_CONTENT_CHARS).optional(),
   fetchedAt: z.date().nullable().optional(),
@@ -146,10 +150,10 @@ export const linksRouter = router({
   create: protectedProcedure
     .input(linkFields.extend({ url: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { url: rawUrl, ...fields } = input;
+      const { url: rawUrl, screenshotUrl, ...fields } = input;
       const normalized = parseUrlOrThrow(rawUrl);
       try {
-        return await ctx.prisma.link.create({
+        const link = await ctx.prisma.link.create({
           data: {
             ...fields,
             url: normalized.url,
@@ -157,6 +161,13 @@ export const linksRouter = router({
             userId: ctx.user.id,
           },
         });
+        // Awaited so the card shows the screenshot as soon as the list
+        // refreshes; the signed URL would not survive a deferred job anyway.
+        if (screenshotUrl) {
+          await storeScreenshot(ctx.prisma, link.id, screenshotUrl);
+          return { ...link, screenshotAt: new Date() };
+        }
+        return link;
       } catch (error) {
         if (
           error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -171,12 +182,17 @@ export const linksRouter = router({
   update: protectedProcedure
     .input(linkFields.partial().extend({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { id, ...data } = input;
+      const { id, screenshotUrl, ...data } = input;
       const link = await ctx.prisma.link.findFirst({
         where: { id, userId: ctx.user.id },
       });
       if (!link) throw new TRPCError({ code: "NOT_FOUND" });
-      return ctx.prisma.link.update({ where: { id }, data });
+      const updated = await ctx.prisma.link.update({ where: { id }, data });
+      if (screenshotUrl) {
+        await storeScreenshot(ctx.prisma, id, screenshotUrl);
+        return { ...updated, screenshotAt: new Date() };
+      }
+      return updated;
     }),
 
   delete: protectedProcedure

@@ -25,6 +25,13 @@ interface Props {
   onEdit: (values: LinkFormValues & { id: string }) => void;
 }
 
+/** Stable per screenshot version: a refetch changes screenshotAt and so the URL. */
+export function screenshotSrc(link: Pick<Link, "id" | "screenshotAt">) {
+  return link.screenshotAt
+    ? `/api/links/${link.id}/screenshot?v=${new Date(link.screenshotAt).getTime()}`
+    : null;
+}
+
 export function LinkCard({ link, onEdit }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -62,6 +69,7 @@ export function LinkCard({ link, onEdit }: Props) {
       <a href={link.url} target="_blank" rel="noopener noreferrer">
         <LinkThumbnail
           ogImageUrl={link.ogImageUrl}
+          screenshotSrc={screenshotSrc(link)}
           faviconUrl={link.faviconUrl}
           domain={link.domain}
           className="transition-opacity hover:opacity-90"

@@ -21,6 +21,12 @@ export interface LinkPreview {
   subCategory: string | null;
   faviconUrl: string | null;
   ogImageUrl: string | null;
+  /**
+   * Signed, short-lived URL of the page screenshot. The form shows it as a
+   * preview and hands it back on save, where the server downloads and stores
+   * the bytes (lib/links/screenshot.ts). Null when the page had none.
+   */
+  screenshotUrl: string | null;
   siteName: string | null;
   content: string;
   /** false when Claude failed and the metadata fallback was used */
@@ -53,6 +59,7 @@ export async function fetchAndClassify(normalized: {
     domain: normalized.domain,
     faviconUrl,
     ogImageUrl,
+    screenshotUrl: page.screenshot,
     siteName,
     content,
   };

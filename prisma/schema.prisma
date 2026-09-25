@@ -153,6 +153,8 @@ model Link {
   siteName    String?
   content     String       @default("") // Firecrawl markdown, capped at 10 000 chars (for search)
   fetchedAt   DateTime? // null when added manually / fetch failed
+  screenshotAt DateTime? // when a page screenshot was stored (see LinkScreenshot); doubles as its cache key
+  screenshot  LinkScreenshot?
   userId      String
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime     @default(now())
@@ -160,4 +162,16 @@ model Link {
 
   @@unique([url, userId])
   @@index([userId, category])
+}
+
+// The page screenshot Firecrawl takes during the scrape. Its own table, not a
+// column on Link: list queries return whole Link rows and must not drag a
+// few hundred KB of PNG per card across the wire. Served by
+// app/api/links/[id]/screenshot/route.ts.
+model LinkScreenshot {
+  linkId      String   @id
+  link        Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  data        Bytes
+  contentType String
+  updatedAt   DateTime @updatedAt
 }
