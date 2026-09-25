@@ -5,37 +5,77 @@ const DOWNLOAD_TIMEOUT_MS = 15_000;
 // this is not a screenshot we want in the database.
 const MAX_BYTES = 5 * 1024 * 1024;
 
-/**
- * Fetches the screenshot Firecrawl returned for a scrape. The URL is a
- * signed storage link that expires, so this runs right when the link is
- * saved, not later. Returns null for anything that is not a reasonably sized
- * https image, so a bad value degrades to "no screenshot" instead of failing
- * the save.
- */
-export async function downloadScreenshot(
-  url: string
-): Promise<{ data: Uint8Array<ArrayBuffer>; contentType: string } | null> {
+// Where Firecrawl hosts scrape screenshots (verified against a live scrape):
+// signed URLs under this bucket. The server only ever fetches from here, so a
+// crafted screenshotUrl cannot make it reach internal hosts or third parties.
+// If Firecrawl moves buckets, storeScreenshot logs the rejected host.
+const ALLOWED_HOST = "storage.googleapis.com";
+const ALLOWED_PATH_PREFIX = "/firecrawl-scrape-media/";
+
+export function isAllowedScreenshotUrl(url: string): boolean {
   let parsed: URL;
   try {
     parsed = new URL(url);
   } catch {
-    return null;
+    return false;
   }
-  if (parsed.protocol !== "https:") return null;
+  return (
+    parsed.protocol === "https:" &&
+    parsed.hostname === ALLOWED_HOST &&
+    parsed.pathname.startsWith(ALLOWED_PATH_PREFIX)
+  );
+}
+
+/**
+ * Fetches the screenshot Firecrawl returned for a scrape. The URL is a
+ * signed storage link that expires, so this runs right when the link is
+ * saved, not later. Only Firecrawl's own bucket is fetched, redirects are
+ * not followed, and the body is read in chunks so an oversized or
+ * length-less response is cut off at MAX_BYTES instead of being buffered.
+ * Returns null for anything that is not an acceptable image, so a bad value
+ * degrades to "no screenshot" instead of failing the save.
+ */
+export async function downloadScreenshot(
+  url: string
+): Promise<{ data: Uint8Array<ArrayBuffer>; contentType: string } | null> {
+  if (!isAllowedScreenshotUrl(url)) return null;
 
   const res = await fetch(url, {
     signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS),
-    redirect: "follow",
+    redirect: "manual",
   });
-  if (!res.ok) return null;
+  if (!res.ok || !res.body) return null;
   const contentType = res.headers.get("content-type")?.split(";")[0].trim();
   if (!contentType?.startsWith("image/")) return null;
   const declared = Number(res.headers.get("content-length"));
   if (declared > MAX_BYTES) return null;
 
-  const buf = new Uint8Array(await res.arrayBuffer());
-  if (buf.byteLength === 0 || buf.byteLength > MAX_BYTES) return null;
-  return { data: buf, contentType };
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  const reader = res.body.getReader();
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > MAX_BYTES) {
+        await reader.cancel();
+        return null;
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  if (total === 0) return null;
+
+  const data = new Uint8Array(new ArrayBuffer(total));
+  let offset = 0;
+  for (const chunk of chunks) {
+    data.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return { data, contentType };
 }
 
 /**
@@ -50,6 +90,12 @@ export async function storeScreenshot(
   screenshotUrl: string
 ): Promise<void> {
   try {
+    if (!isAllowedScreenshotUrl(screenshotUrl)) {
+      console.warn(
+        `Screenshot for link ${linkId} rejected: not a Firecrawl storage URL`
+      );
+      return;
+    }
     const shot = await downloadScreenshot(screenshotUrl);
     if (!shot) return;
     const now = new Date();
